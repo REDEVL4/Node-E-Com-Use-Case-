@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {GetAllUsers,GetUserById,CreateUser,UpdateUser,DeleteUser,CreateBulkUsers, getVerificationCode, verifyUserEmailPost} from "../Controllers/UserController.js"
+import {SignInGet,GetAllUsers,GetUserById,CreateUser,UpdateUser,DeleteUser,CreateBulkUsers, getVerificationCode, verifyUserEmailPost} from "../Controllers/UserController.js"
 const UserRoutes = Router()
 UserRoutes.get('/',GetAllUsers)
 UserRoutes.get('/code/:id',getVerificationCode)

@@ -3,7 +3,9 @@ export const getAllShipmentsForUser = async(req,res,next)=>
 {
     try
     {
-        const shipmentDetails = await req.user.getShipments({})
+        const user = await User.findByPk(req.session.userId)
+        if(!user) throw new Error(`User must be authenticated to continue`)
+        const shipmentDetails = await user.getShipments({})
         return res.status(200).json({statusCode:200, message:'shipment details fetched',result:shipmentDetails})
     }
     catch(err)

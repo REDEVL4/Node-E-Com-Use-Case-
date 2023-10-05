@@ -1,0 +1,141 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f7f7f7;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #232f3e;
+    color: white;
+    text-align: center;
+    padding: 20px 0;
+    font-size: 24px;
+}
+
+main {
+    padding: 20px;
+}
+
+.product-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.product {
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin: 10px;
+    padding: 10px;
+    width: 300px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+}
+
+.product-image img {
+    max-width: 100%;
+    height: auto;
+}
+
+.product-details h2 {
+    font-size: 20px;
+    margin: 10px 0;
+}
+
+.product-details p {
+    margin: 5px 0;
+}
+
+.product-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.product-actions a {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
+}
+
+.product-actions a:hover {
+    color: #0056b3;
+}
+
+/* Add your custom styles here */
+body {
+    background-color: #f7f7f7;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    padding: 20px;
+}
+
+.card {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+
+    /*new*/
+    padding: 5px;
+}
+
+.card-title {
+    font-size: 18px;
+}
+
+.card-text {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.btn-group {
+    margin-top: 10px;
+}
+
+.text-danger {
+    color: red;
+}
+/* ... Previous CSS ... */
+
+.product-image {
+    position: relative; /* Required for absolute positioning */
+}
+
+.product-image img {
+    max-width: 60%;
+    height: 290px;
+}
+
+.product-out-of-stock {
+    position: absolute;
+    top: 35px;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #ff0000; /* Red color */
+    transform: rotate(45deg); /* Rotate by 45 degrees */
+    padding: 5px 10px; /* Adjust padding as needed */
+    z-index: 1; /* Place it above the image */
+    font-size: 14px;
+    font-weight: bold;
+}
+/* ... Previous CSS ... */
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+.bounce {
+    animation: bounce 1s infinite;
+}
+

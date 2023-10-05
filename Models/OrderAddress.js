@@ -1,6 +1,6 @@
 import { DataTypes, Sequelize } from "sequelize";
 import AzureMySqlSequelize from "../Utils/AzureMySqlSequelize.js";
-const UserAddress = AzureMySqlSequelize.define('UserAddress',
+const OrderAddress = AzureMySqlSequelize.define('OrderAddress',
 {
      Id:
       {
@@ -8,12 +8,6 @@ const UserAddress = AzureMySqlSequelize.define('UserAddress',
         primaryKey: true,
         allowNull:false,
         defaultValue:DataTypes.UUIDV4  
-      },
-      AddressType:
-      {
-        type: DataTypes.STRING,
-        values:["permanent","default","shipping","delivery","seller","others"],
-        allowNull:true
       },
       AddressLine1: {
         type: DataTypes.STRING,
@@ -33,15 +27,15 @@ const UserAddress = AzureMySqlSequelize.define('UserAddress',
       Country: {
         type: DataTypes.STRING,
       },
-      UserId:
+      OrderId:
       {
         type:DataTypes.UUID,
         primaryKey:true,
         references:
         {
-            model:'Users',
+            model:'Orders',
             key:'Id'
         }
       }
 })
-export default UserAddress
+export default OrderAddress

@@ -23,6 +23,11 @@ const CartProducts = AzureMySqlSequelize.define('CartProducts',
             key:'Id'
         }
     },
+    IsAvailableInStock:
+    {
+        type:DataTypes.BOOLEAN,
+        defaultValue:1
+    },
     Quantity:
     {
         type:DataTypes.INTEGER,

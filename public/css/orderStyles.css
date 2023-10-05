@@ -1,0 +1,141 @@
+/* Updated styles for the orders page */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #007BFF;
+    color: #fff;
+    text-align: center;
+    padding: 10px 0;
+}
+
+.orders {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.order-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.order {
+    border: 1px solid #ddd;
+    margin-bottom: 20px;
+    padding: 20px;
+    position: relative;
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.order-header h2 {
+    margin: 0;
+}
+
+.view-products-button, .cancel-order-button {
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+    border-radius: 4px;
+}
+
+.view-products-button:hover, .cancel-order-button:hover {
+    background-color: #0056b3;
+}
+
+.products {
+    /* Remove 'display: none;' to make products visible by default */
+    margin-top: 10px;
+    opacity: 0; /* Start with opacity 0 */
+    max-height: 0; /* Start with no height */
+    overflow: hidden; /* Hide overflow content */
+    transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+.show-products {
+    /* Change 'display: block;' to adjust max-height and opacity */
+    max-height: 1000px; /* Adjust max height as needed */
+    opacity: 1; /* Make products fully visible */
+    /* height: 320px; */
+}
+
+/* Product list inside the products div */
+.products ul {
+    width: 100%;
+    list-style-type: none;
+    padding: 0;
+    display: flex;
+    flex-direction: row;
+    overflow-y: hidden;
+    overflow-x: auto;
+}
+.products li {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-top: 10px;
+    opacity: 1; /* Ensure the products are fully visible */
+    transform: translateY(0); /* Ensure products are not translated */
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    width: 250px;
+    height: 250px;
+    margin: 5px;
+}
+
+.products img {
+    max-width: 100px;
+    max-height: 100px;
+    vertical-align: middle;
+}
+
+#OrderOprButtons
+{
+    margin-top: 10px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+}
+#DownloadInvoice
+{
+    margin: 0px;
+}
+#OrderOprButtons button
+{
+    margin: 5px;
+}
+#addressSelection
+{
+    display: flex;
+    flex-direction: row;
+    justify-content: right;
+}
+#textarea
+{
+ width: 400px;
+ margin-right: 10px;
+ overflow: auto;
+ display: block;
+ white-space: normal;
+}
+.dropdown-item:hover
+{
+    background-color: rgba(0, 0, 0, 0.623);
+    color: aliceblue;
+}

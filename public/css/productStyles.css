@@ -1,0 +1,120 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+header {
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+}
+li.active{
+    color: white;
+    font-size: 16px;
+    transition: color 0.2s;
+}
+
+h1 {
+    margin: 0;
+    padding: 0;
+}
+
+main {
+    max-width: 90%;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.product-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+}
+
+.product {
+    width: calc(30% - 20px); /*50% with some margin in between*/
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #fff;
+    position: relative;
+}
+
+.product-info {
+    /* display: none; Initially hide the product info */
+}
+
+.product:hover .product-info {
+    display: block; /* Show product info on hover */
+}
+
+.product-image-container {
+    position: relative;
+}
+
+.product-image {
+    width: 100%;
+    height: auto;
+    /*new*/
+    width: 240px;
+    height: 300px;
+}
+
+.product-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 10px;
+    display: none; /* Initially hide the overlay */
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    overflow-y: auto;
+}
+
+.product:hover .product-overlay {
+    display: block; /* Show overlay on hover */
+}
+
+/* Add these styles to your existing styles.css file */
+
+/* .product-info-btnGroup {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+} */
+
+/* Add these styles to your existing styles.css file */
+
+
+.product-info-btnGroup
+{
+    margin-left:auto ;
+    margin-right: auto;
+    margin-top: 2px;
+    margin-bottom: 10px;
+}
+.product-out-of-stock {
+    position: absolute;
+    top: 35px;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #ff0000; /* Red color */
+    transform: rotate(45deg); /* Rotate by 45 degrees */
+    padding: 5px 10px; /* Adjust padding as needed */
+    z-index: 1; /* Place it above the image */
+    font-size: 14px;
+    font-weight: bold;
+}

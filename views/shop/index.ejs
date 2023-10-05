@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Website</title>
+    <!-- Include Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Include Bootswatch Cosmo theme -->
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.2.3/dist/cosmo/bootstrap.min.css" rel="stylesheet"> -->
+    <link href="/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/productStyles.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <link href="/css/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <a class="navbar-brand" href="/">E-Com</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item <%= activePage === 'home' ? 'active' : '' %>">
+                    <a class="nav-link" href="/">Home</a>
+                </li>    
+            <%if(isLoggedIn===true){%>
+                    <li class="nav-item <%= activePage === 'cart' ? 'active' : '' %>">
+                        <a class="nav-link" href="/shop/cart"><i class="fa-solid fa-cart-shopping fa-bounce" style="color: #e1e3d7;"></i></a>
+                    </li>
+                    <li class="nav-item <%= activePage === 'orders' ? 'active' : '' %>">
+                        <a class="nav-link" href="/shop/orders">Orders</a>
+                    </li>            
+                    <%if(IsSeller==true){%>
+                        <li class="nav-item <%= activePage === 'orders' ? 'active' : '' %>">
+                            <a class="nav-link" href="/admin"><%=UserName%> Page</a>
+                        </li>                        
+                    <%}%>
+                <%}else{%>
+                    <li class="nav-item <%= activePage === 'signIn' ? 'active' : '' %>">
+                        <a class="nav-link" href="/shop/users/signIn">Sign In</a>
+                    </li>                    
+                    <li class="nav-item <%= activePage === 'signUp' ? 'active' : '' %>">
+                        <a class="nav-link" href="/shop/users/signUp">Sign Up</a>
+                    </li>                    
+                <%}%>
+
+                <%if(isLoggedIn===true){%>
+                    <li class="nav-item <%= activePage === 'signOut' ? 'active' : '' %>">
+                    <form method="post" action="/shop/users/signOut">
+                        <button class="nav-link" type="submit"><i class="fa-solid fa-right-from-bracket fa-xl" style="color: #e8ec09;"></i></button>
+                    </form>
+                </li>
+                <%}%>
+            </ul>
+        </div>
+    </nav>
+    <div id="alerts" style="position: fixed;top: 10px;right: 3%;">
+        <%if(message){%>
+            <%if(isSuccess){%>
+                <div class="alert alert-success" role="alert">
+                    <%=message%>
+                </div>
+            <%}else{%>
+                <div class="alert alert-danger" role="alert">
+                    <%=message%>
+                </div>
+            <%}%>        
+        <%}%>
+    </div>
+    <!-- page content -->
+    <!-- <div class="homeContainer">
+        <div class="products">
+            <%if(products.length>0){%>
+                <% products.forEach(function(product) { %>
+                    <div class="product">
+                        <img src="<%= product.ImageUrl %>" alt="<%= product.Name %>">
+                        <div class="product-info">
+                            <h2><%= product.Name %></h2>
+                            <p class="product-info-Description"><strong>Description:</strong> <%= product.Description %></p>
+                            <p class="product-info-Price"><strong>Price:</strong> $<%= product.Cost %></p>
+                            <p class="product-info-Quantity"><strong>In Stock:</strong> <%= product.AvailabileQuantity %></p>
+                            <p class="product-info-manBy"><strong>Manufacturer:</strong> <%= product.ManufacturedBy %></p>
+                            <div class="product-info-btnGroup">
+                                <button class="product-info-btnGroup-view">View</button>
+                                <button class="product-info-btnGroup-addToCart">Add to Cart</button>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>    
+            <%}else{%>
+                <div class="noProducts">No Products Found</div>
+                <%}%>
+        </div>
+    </div> -->
+    <main>
+        <div class="product-container">
+            <%if(products && products.length >0){%>
+            <% products.forEach(product => { %>
+                <div class="product" id="<%=product.Id%>">
+                    <div class="product-info" id="outOfStock<%=product.Id%>">
+                        <% if (product.AvailabileQuantity === 0) { %>
+                            <div class="product-out-of-stock">Out of Stock</div>
+                        <% } %>
+                        <h2 class="productName"><%= product.Name %></h2>
+                        <p class="productCategory">Category: <%= product.Category %></p>
+                        <p class="Subcategory">Subcategory: <%= product.SubCategory %></p>
+                        <p class="Cost">Cost: $<%= product.Cost %></p>
+                        <%if(product.AvailabileQuantity > 0 && product.AvailabileQuantity < 10){%>
+                            <p id="AvailableQuantityHeader<%=product.Id%>" class="AvailableQuantity text-danger bounce %>"><span id="<%=product.Id%>AvailableQuantity">Only <%= product.AvailabileQuantity %> left in stock.</span></p>
+                        <%}%>
+                        <!-- <% if(IsSeller==true){%>
+                            <button class="btn btn-outline-danger removeProduct" onclick='onRemoveProduct("<%=product.Id%>")'><i class="fa-solid fa-trash" style="color: #ec555d;"></i></button>
+                        <%}%> -->
+                        <div class="btn-group mt-2 mb-3">
+                            <button class=" btn btn-outline-warning viewDetails">View Details</button> 
+                            <% if (product.AvailabileQuantity > 0) { %>
+                                <button class="btn btn-outline-success addToCart" id="addToCart<%=product.Id%>" onclick='addToCart("<%=product.Id%>")'><i class="fa-solid fa-cart-plus fa-xl"></i></button>
+                            <%}%>
+                            <!-- <% if(IsSeller==true){%>
+                                <button class="btn btn-outline-success editProduct" onclick='onEditProduct("<%=product.Id%>")'>Edit Details</button>
+                            <%}%> -->
+                        </div>
+                </div>
+                    <div class="product-image-container">
+                        <img src="<%= product.ImageUrl %>" alt="<%= product.Name %>" class="product-image">
+                        <div class="product-overlay">
+                            <p><%= product.Description %></p>
+                            <p>Manufactured By: <%= product.ManufacturedBy %></p>
+                            <p>Manufactured On: <%= new Date(product.ManufacturedOn).toLocaleDateString() %></p>
+                            <p>Seller: <%= product.SellerInfo.SellerName %></p>
+                            <p>Seller Email: <%= product.SellerInfo.SellerEmail %></p>
+                            <p>Seller Address: <%= product.SellerInfo.SellerAddress.AddressLine1 %>, <%= product.SellerInfo.SellerAddress.AddressLine2 %>, <%= product.SellerInfo.SellerAddress.ZipCode %>, <%= product.SellerInfo.SellerAddress.City %>, <%= product.SellerInfo.SellerAddress.State %>, <%= product.SellerInfo.SellerAddress.Country %></p>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+            <%}else{%>
+                <p class="mb-2 pb-3 pt-3 bg-primary text-white text-center" style="font-size: larger;font-weight: bolder;border-radius: 5px; width: 90%;">No products found.</p>
+            <%}%>
+        </div>
+        <input hidden id="UserName" value="<%=UserName%>"/>
+        <input hidden id="Password" value="<%=Password%>"/>
+    </main>
+    <script>
+                const getAuthToken = ()=>
+        {
+            console.log(JSON.stringify({
+                "UserName":`${document.getElementById('UserName').value}`,
+                "Password":`${document.getElementById('Password').value}`
+            }))
+            if(!document.getElementById('UserName').value || !document.getElementById('Password').value )
+            {
+                window.location.href = '/shop/users/signIn';
+                throw new Error('Need to be authenticated')
+            }
+            return fetch('http://localhost:8003/auth/generateToken',{
+            method:'POST',
+            headers:{
+                'Content-Type':'application/json'
+            },
+            body:JSON.stringify({
+                "UserName":`${document.getElementById('UserName').value}`,
+                "Password":`${document.getElementById('Password').value}`
+            })})
+            .then(result=>
+            {
+                console.log(result)
+                return result.json()
+            })
+            .then(result=>
+            {
+                console.log(result)
+                return result.result.Token
+            })
+            .catch(err=>
+            {
+                console.log(err.message)
+            })
+        
+        }
+        function addToCart(productId)
+        {
+            const url = `http://localhost:8003/cart/${productId}?quantity=1`
+            getAuthToken()
+            .then(authToken=>{
+                fetch(url,{
+                method:'post',
+                headers:{
+                    "Authorization":`Bearer ${authToken}`
+                }
+            }).then(result=>
+            {
+                console.log(result)
+                return result.json()
+            })
+            .then(result=>
+            {
+                //for dynamically change the product page
+                const product = document.getElementById(productId)
+                const quantityElement = document.getElementById(`${productId}AvailableQuantity`)
+                let quantity = +quantityElement.textContent
+                console.log('change',quantityElement)
+                // if(quantity>1)
+                // {
+                //     quantityElement.textContent = quantity - 1
+                // }
+                // else
+                // {
+                //     quantityElement.textContent = quantity - 1
+
+                //     document.getElementById(`addToCart${productId}`).remove()
+                //     document.getElementById(`AvailableQuantityHeader${productId}`).setAttribute('class','text-danger')
+
+                //     const outOfStock = document.createElement('div')
+                //     outOfStock.setAttribute('class','product-out-of-stock')
+                //     outOfStock.innerText = 'Out of Stock'
+                //     document.getElementById(`outOfStock${productId}`).append(outOfStock)
+                //     // document.getElementById(productId).remove()
+                // }
+                console.log('final ',result)
+            })
+            .catch(err=>
+            {
+                console.log(err)
+            })
+            })
+        }
+        const clearAlerts = function()
+        {
+            document.querySelectorAll('.alert').forEach(alertElement=>
+            {
+            setTimeout(()=>
+            {
+                document.getElementsByClassName(alertElement.className)[0].remove()
+            },2000)
+            })
+        }
+        clearAlerts()
+    </script>
+</body>
+</html>

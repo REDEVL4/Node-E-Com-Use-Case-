@@ -9,6 +9,11 @@ const Seller = AzureMySqlSequelize.define('Seller',
         allowNull:false,
         defaultValue:DataTypes.UUIDV4
     },
+    Name:
+    {
+        type:DataTypes.STRING,
+        allowNull:false
+    }
 
 })
 export default Seller

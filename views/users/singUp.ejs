@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Include Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/cartStyles.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <link href="/css/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>Sign Up</title>
+    <style>
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
+        form {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            /* display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; */
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="password"],
+        input[type="checkbox"] {
+            min-width: 400px;
+            width: 95%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        input[type="checkbox"] {
+            width: auto;
+            margin-top: 10px;
+        }
+
+        button[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        .IsSellerElementHolder
+        {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <a class="navbar-brand" href="/">E-Com</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item <%= activePage === 'home' ? 'active' : '' %>">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>    
+                <%if(isLoggedIn===true){%>
+                        <li class="nav-item <%= activePage === 'cart' ? 'active' : '' %>">
+                            <a class="nav-link" href="/shop/cart"><i class="fa-solid fa-cart-shopping fa-bounce" style="color: #e1e3d7;"></i></a>
+                        </li>
+                        <li class="nav-item <%= activePage === 'orders' ? 'active' : '' %>">
+                            <a class="nav-link" href="/shop/orders">Orders</a>
+                        </li>                    
+                    <%}else{%>
+                        <li class="nav-item <%= activePage === 'signIn' ? 'active' : '' %>">
+                            <a class="nav-link" href="/shop/users/signIn">Sign In</a>
+                        </li>                    
+                        <li class="nav-item <%= activePage === 'signUp' ? 'active' : '' %>">
+                            <a class="nav-link" href="/shop/users/signUp">Sign Up</a>
+                        </li>                    
+                    <%}%>
+    
+                    <%if(isLoggedIn===true){%>
+                        <li class="nav-item <%= activePage === 'signOut' ? 'active' : '' %>">
+                        <form method="post" action="/shop/users/signOut">
+                            <button class="nav-link" type="submit"><i class="fa-solid fa-right-from-bracket fa-xl" style="color: #e8ec09;"></i></button>
+                        </form>
+                    </li>
+                    <%}%>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <div id="alerts" style="position: fixed;top: 10px;right: 3%;">
+        <%if(message){%>
+            <%if(isSuccess){%>
+                <div class="alert alert-success" role="alert">
+                    <%=message%>
+                </div>
+            <%}else{%>
+                <div class="alert alert-danger" role="alert">
+                    <%=message%>
+                </div>
+            <%}%>        
+        <%}%>
+    </div>
+    <h1>Sign Up</h1>
+    <form action="/shop/users/signUp" method="post" id="form">
+        <label for="FirstName">First Name:</label>
+        <input type="text" id="FirstName" name="FirstName" required><br>
+
+        <label for="LastName">Last Name:</label>
+        <input type="text" id="LastName" name="LastName" required><br>
+
+        <label for="PreferredName">Preferred Name:</label>
+        <input type="text" id="PreferredName" name="PreferredName" required><br>
+
+        <label for="Age">Age:</label>
+        <input type="number" id="Age" name="Age" required><br>
+
+        <label for="UserName">Username:</label>
+        <input type="text" id="UserName" name="UserName"  required><br>
+
+        <label for="Email">Email:</label>
+        <input type="email" id="Email" name="Email"  required><br>
+
+        <label for="MobileNumber">Mobile Number:</label>
+        <input type="tel" id="MobileNumber" name="MobileNumber" required><br>
+
+        <label for="Password">Password:</label>
+        <input type="password" id="Password" name="Password" required><br>
+
+        <label for="AddressLine1">Address Line 1:</label>
+        <input type="text" id="AddressLine1" name="AddressLine1"  required><br>
+
+        <label for="AddressLine2">Address Line 2:</label>
+        <input type="text" id="AddressLine2" name="AddressLine2" ><br>
+
+        <label for="ZipCode">Zip Code:</label>
+        <input type="text" id="ZipCode" name="ZipCode" required><br>
+
+        <label for="City">City:</label>
+        <input type="text" id="City" name="City" required><br>
+
+        <label for="State">State:</label>
+        <input type="text" id="State" name="State" required><br>
+
+        <label for="Country">Country:</label>
+        <input type="text" id="Country" name="Country" required><br>
+
+
+        <div id="SellerElement">
+            <div class="IsSellerElementHolder">
+                <label for="IsSeller">Are you a seller?</label>
+                <input type="checkbox" id="IsSeller" name="IsSeller" />
+            </div>
+        </div>
+        <button style="position: relative; bottom: 10px; right: auto; margin-top: 10px;" type="submit" value="Sign Up">Submit</button>
+    </form>
+        <!-- Bootstrap JS -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            const formElement = document.getElementById('form')
+            const IsSellerElement = document.getElementById('IsSeller')
+            IsSellerElement.addEventListener('click',()=>
+            {
+                if(IsSellerElement.checked)
+                {
+                    const SellerElement = document.getElementById('SellerElement')
+                    const SellerNameElement = document.createElement('div')
+                    SellerNameElement.setAttribute('id','SellerNameElement')
+                    SellerNameElement.innerHTML = `<label for="SellerName">Seller Name:</label>
+            <input type="text" id="SellerName" name="SellerName" required><br>`
+                    SellerElement.appendChild(SellerNameElement)
+                    IsSellerElement.nodeValue = true
+                }
+                else
+                {
+                    IsSellerElement.nodeValue = false
+                    const existingElement = document.getElementById('SellerNameElement')
+                    existingElement.remove()
+                }
+            })
+        const clearAlerts = function()
+        {
+            document.querySelectorAll('.alert').forEach(alertElement=>
+            {
+            setTimeout(()=>
+            {
+                document.getElementsByClassName(alertElement.className)[0].remove()
+            },2000)
+            })
+        }
+        clearAlerts()
+        </script>
+</body>
+</html>

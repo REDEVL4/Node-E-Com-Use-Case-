@@ -1,7 +1,8 @@
 import { Router } from "express";
-import {getUserAddress, addUserAddress, setDefaultAddress} from "../Controllers/UserController.js"
+import {getUserAddressById, getUserAddress, addUserAddress, changeAddresstype} from "../Controllers/UserController.js"
 const UserAddressRoutes = Router()
 UserAddressRoutes.get('/',getUserAddress)
+UserAddressRoutes.get('/:addressId',getUserAddressById)
 UserAddressRoutes.post('/',addUserAddress)
-UserAddressRoutes.put('/:id',setDefaultAddress)
+UserAddressRoutes.patch('/:status/:userId/:addressId',changeAddresstype)
 export default UserAddressRoutes

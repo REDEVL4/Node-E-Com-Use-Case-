@@ -1,0 +1,132 @@
+/* Basic styles for the basket page */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+
+.basket {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+img {
+    max-width: 100px;
+    max-height: 100px;
+    vertical-align: middle;
+}
+
+.quantity-button {
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button {
+    background-color: #f2f2f2;
+    border: none;
+    padding: 5px 10px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #ddd;
+}
+.totalCost
+{
+}
+.product-out-of-stock {
+    position: relative;
+    top: 83px;
+    left: -36px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #ff0000;
+    transform: rotate(45deg);
+    padding: 5px 10px;
+    z-index: 1;
+    font-size: 14px;
+    font-weight: bold;
+    width: 80%;
+    text-align: center;
+}
+
+/* Style for products not available in the cart */
+.productsRow.not-available {
+    background-color: #f0f0f0; /* Background color for not available products */
+    opacity: 0.7; /* Reduce opacity to make it visually less prominent */
+    pointer-events: none;
+    /* You can add more styles as needed */
+}
+/* .productsRow.not-available td.productManuplation button:not(.remove-button) {
+    display: none;
+} */
+
+.productsRow.not-available img {
+    filter: grayscale(100%); /* Turn the product image grayscale */
+    /* You can add more image-specific styles if necessary */
+}
+
+.productsRow.not-available h3 {
+    color: #ccc; /* Text color for the product name */
+    /* You can adjust the color as needed */
+}
+
+.productsRow.not-available p {
+    color: #999; /* Text color for the product description */
+    /* You can adjust the color as needed */
+}
+
+.productsRow.not-available button.btn-danger
+{    
+    pointer-events: all;
+    opacity: 1;
+    background-color:red;
+    animation: bounce 3s infinite;
+}
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0); /* Bounce positions */
+    }
+    40% {
+        transform: translateY(-20px); /* Bounce height */
+    }
+    60% {
+        transform: translateY(-10px); /* Bounce height */
+    }
+}
+.product-out-of-stock {
+    pointer-events: all;
+    position: relative;
+    top: 83px;
+    left: -18px;
+    background-color: rgba(0, 0, 0, 1);
+    color: #ff0000;
+    transform: rotate(45deg);
+    padding: 5px 10px;
+    z-index: 1;
+    font-size: 14px;
+    font-weight: bold;
+    width: 80%;
+    text-align: center;
+}

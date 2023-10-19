@@ -27,6 +27,7 @@ export const GetOrdersById = async(req,res,next)=>
                 createdAt:order.createdAt,
                 updatedAt:order.updatedAt,
                 Products:order.Products.map(product=>({
+                    WarehouseId: product.OrderProducts.WarehouseId,
                     Id: product.Id,
                     Name: product.Name,
                     Description: product.Description,
@@ -72,6 +73,7 @@ export const GetOrdersByStatus = async(req,res,next)=>
                 createdAt:order.createdAt,
                 updatedAt:order.updatedAt,
                 Products:order.Products.map(product=>({
+                    WarehouseId: product.OrderProducts.WarehouseId,
                     Id: product.Id,
                     Name: product.Name,
                     Description: product.Description,
@@ -99,22 +101,31 @@ export const CreateOrder = async(req,res,next)=>
         if(!user) throw new Error(`User must be authenticated to continue`)
         // const pendingOrders = await user.getOrders({where:{Status:'pending'}})
         // if(pendingOrders.length>0) throw {statusCode:422, message:`Cannot place order with pending orders in queue`}
-        let userCart = await user.getCart()
+        let userCart = await user.getCart({include:[{model: Product, attributes:["Id","Name","Cost","Category","SubCategory","ManufacturedBy"],through:{attributes:["CartId","Quantity","WarehouseId"]},
+        include:
+        [
+            {
+                model:Seller,
+                attributes:["Id","Name"],
+                through:{attributes:["Quantity"]}
+            }
+        ]}]})
         if(userCart)
         {
-            let userBasketProducts = await userCart.getProducts({
-                attributes:["Id","Name","Cost","Category","SubCategory","ManufacturedBy"],
-                include:
-                [
-                    {
-                        model:Seller,
-                        attributes:["Id","Name"],
-                        through:{attributes:["Quantity"]}
-                    }
-                ]
-            })
-            userBasketProducts = userBasketProducts.map(product=>(
+            // let userBasketProducts = await userCart.getProducts({
+            //     attributes:["Id","Name","Cost","Category","SubCategory","ManufacturedBy"],
+            //     include:
+            //     [
+            //         {
+            //             model:Seller,
+            //             attributes:["Id","Name"],
+            //             through:{attributes:["Quantity"]}
+            //         }
+            //     ]
+            // })
+            const userBasketProducts = userCart.Products.map(product=>(
                 {
+                    WarehouseId: product.CartProducts.WarehouseId,
                     ProductId:product.Id,
                     ProductName:product.Name,
                     ProductCost:product.Cost,
@@ -130,8 +141,8 @@ export const CreateOrder = async(req,res,next)=>
                     {
                         CartId:product.CartProducts.CartId,
                          PlacedQuantity:product.CartProducts.Quantity
-                        }}))
-
+                    }
+                    }))
             //check availability
             let productsAvailable = true
             userBasketProducts.forEach(async(product)=>
@@ -147,13 +158,13 @@ export const CreateOrder = async(req,res,next)=>
             // userOrder.addOrderAddresses()
             userBasketProducts.forEach(async(product)=>
                 {
-                    const seller = await Seller.findByPk(product.Seller.SellerId)
-                    const productToUpdate = (await seller.getProducts({where:{Id:product.ProductId}}))[0]
-                    console.log(productToUpdate.SellerProducts.Quantity,product.Cart.PlacedQuantity)
-                    productToUpdate.SellerProducts.Quantity -= product.Cart.PlacedQuantity 
-                    console.log(productToUpdate.SellerProducts.Quantity)
-                    await productToUpdate.SellerProducts.save()
-                    await userOrder.addProducts(product.ProductId,{through:{Quantity:+product.Cart.PlacedQuantity}})
+                    // const seller = await Seller.findByPk(product.Seller.SellerId)
+                    // const productToUpdate = (await seller.getProducts({where:{Id:product.ProductId}}))[0]
+                    // console.log(productToUpdate.SellerProducts.Quantity,product.Cart.PlacedQuantity)
+                    // productToUpdate.SellerProducts.Quantity -= product.Cart.PlacedQuantity 
+                    // console.log(productToUpdate.SellerProducts.Quantity)
+                    // await productToUpdate.SellerProducts.save()
+                    await userOrder.addProducts(product.ProductId,{through:{Quantity:+product.Cart.PlacedQuantity, WarehouseId: product.WarehouseId}})
                 })
             return res.status(200).json({statusCode:'200',message:`Order: ${userOrder.Id} placed with ${userBasketProducts.length} Basket Products`,result:{orderId:userOrder.Id}})     
         }
@@ -208,12 +219,11 @@ export const SetOrderAddress = async (req, res, next)=>
         if(!fetchedOrder) throw new Error(`Invalid request, Order does not exists.`)
         if(fetchedOrder.Status === 'pending')
         {
-            const address = await user.getUserAddress({where:{Id: addressId}})
+            const address = (await user.getUserAddresses({where:{Id: addressId}}))[0]
             if(!address) throw new Error(`Invalid request, Invalid Address details.`)
             const {AddressLine1, AddressLine2, ZipCode, City, State, Country} = address
             await fetchedOrder.createOrderAddress({AddressLine1, AddressLine2, ZipCode, City, State, Country})
         }
-        fetchedOrder.getOrderAddress().destroy()
         return res.status(200).json({statusCode:'200',message:`Order:${orderId} address set successfully`})
     }
     catch(err)
@@ -301,6 +311,7 @@ export const RenderOrders = async(req,res,next)=>
                 createdAt:order.createdAt,
                 updatedAt:order.updatedAt,
                 Products:order.Products.map(product=>({
+                    WarehouseId: product.OrderProducts.WarehouseId,
                     Id: product.Id,
                     Name: product.Name,
                     Description: product.Description,
@@ -334,22 +345,20 @@ export const RenderCreateOrder = async(req,res,next)=>
         if(!user) throw new Error(`User must be authenticated to continue`)
         // const pendingOrders = await user.getOrders({where:{Status:'pending'}})
         // if(pendingOrders.length>0) throw {statusCode:422, message:`Cannot place order with pending orders in queue`}
-        let userCart = await user.getCart()
+        let userCart = await user.getCart({include:[{model: Product, attributes:["Id","Name","Cost","Category","SubCategory","ManufacturedBy"],through:{attributes:["CartId","Quantity","WarehouseId"]},
+        include:
+        [
+            {
+                model:Seller,
+                attributes:["Id","Name"],
+                through:{attributes:["Quantity"]}
+            }
+        ]}]})
         if(userCart)
         {
-            let userBasketProducts = await userCart.getProducts({
-                attributes:["Id","Name","Cost","Category","SubCategory","ManufacturedBy"],
-                include:
-                [
-                    {
-                        model:Seller,
-                        attributes:["Id","Name"],
-                        through:{attributes:["Quantity"]}
-                    }
-                ]
-            })
-            userBasketProducts = userBasketProducts.map(product=>(
+            const userBasketProducts = userCart.Products.map(product=>(
                 {
+                    WarehouseId: product.CartProducts.WarehouseId,
                     ProductId:product.Id,
                     ProductName:product.Name,
                     ProductCost:product.Cost,
@@ -382,13 +391,13 @@ export const RenderCreateOrder = async(req,res,next)=>
 
             const finsihPromise = userBasketProducts.map(async(product)=>
                 {
-                    const seller = await Seller.findByPk(product.Seller.SellerId)
-                    const productToUpdate = (await seller.getProducts({where:{Id:product.ProductId}}))[0]
-                    console.log(productToUpdate.SellerProducts.Quantity,product.Cart.PlacedQuantity)
-                    productToUpdate.SellerProducts.Quantity -= product.Cart.PlacedQuantity 
-                    console.log(productToUpdate.SellerProducts.Quantity)
-                    await productToUpdate.SellerProducts.save()
-                    await userOrder.addProducts(product.ProductId,{through:{Quantity:+product.Cart.PlacedQuantity}})
+                    // const seller = await Seller.findByPk(product.Seller.SellerId)
+                    // const productToUpdate = (await seller.getProducts({where:{Id:product.ProductId}}))[0]
+                    // console.log(productToUpdate.SellerProducts.Quantity,product.Cart.PlacedQuantity)
+                    // productToUpdate.SellerProducts.Quantity -= product.Cart.PlacedQuantity 
+                    // console.log(productToUpdate.SellerProducts.Quantity)
+                    // await productToUpdate.SellerProducts.save()
+                    await userOrder.addProducts(product.ProductId,{through:{Quantity:+product.Cart.PlacedQuantity, WarehouseId: product.WarehouseId}})
                 })
             await Promise.all(finsihPromise)
             await userCart.destroy()

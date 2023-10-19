@@ -3,6 +3,6 @@ import { GetCart,ClearCart,AddProductToCart,RemoveProductFromCart } from "../Con
 const CartRoutes = Router()
 CartRoutes.get('/',GetCart)
 CartRoutes.delete('/',ClearCart)
-CartRoutes.post('/:id',AddProductToCart)
-CartRoutes.delete('/:id',RemoveProductFromCart)
+CartRoutes.post('/:warehouseId/:productId',AddProductToCart)
+CartRoutes.delete('/:warehouseId/:productId',RemoveProductFromCart)
 export default CartRoutes

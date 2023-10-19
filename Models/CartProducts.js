@@ -23,14 +23,26 @@ const CartProducts = AzureMySqlSequelize.define('CartProducts',
             key:'Id'
         }
     },
+    WarehouseId:
+    {
+        type:DataTypes.UUID,
+        allowNull:false,
+        // references:
+        // {
+        //     model:'Warehouses',
+        //     key:'Id'
+        // }
+    },
     IsAvailableInStock:
     {
         type:DataTypes.BOOLEAN,
+        allowNull:false,
         defaultValue:1
     },
     Quantity:
     {
         type:DataTypes.INTEGER,
+        allowNull:false,
         defaultValue:0
     }
 })

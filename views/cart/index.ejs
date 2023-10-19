@@ -24,7 +24,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item <%= activePage === 'home' ? 'active' : '' %>">
-                        <a class="nav-link" href="/">Home</a>
+                        <a class="nav-link" href="/shop">Home</a>
                     </li>    
                 <%if(isLoggedIn===true){%>
                         <li class="nav-item <%= activePage === 'cart' ? 'active' : '' %>">
@@ -35,8 +35,11 @@
                         </li>
                         <%if(IsSeller==true){%>
                             <li class="nav-item <%= activePage === 'orders' ? 'active' : '' %>">
-                                <a class="nav-link" href="/admin"><%=UserName%> Page</a>
+                                <a class="nav-link" href="/shop/admin"><%=UserName%> Page</a>
                             </li>                        
+                            <li class="nav-item <%= activePage === 'orders' ? 'active' : '' %>">
+                                <a class="nav-link" href="/shop/admin/warehouses">Warehouses</a>
+                            </li>                            
                         <%}%>
                 <%}else{%>
                         <li class="nav-item <%= activePage === 'signIn' ? 'active' : '' %>">
@@ -94,13 +97,13 @@
                             </td>
                             <td id="<%= product.Id %>productCost">$<%= product.Cost %></td>
                             <td class="productManuplation">
-                                <button class="quantity-button " onclick="decrementQuantity('<%= product.Id %>')">-</button>
+                                <button class="quantity-button " onclick="decrementQuantity('<%= product.Id %>','<%=product.WarehouseId%>')">-</button>
                                 <span id="<%= product.Id %>Quantity"><%= product.Quantity %></span>
-                                <button class="quantity-button " onclick="incrementQuantity('<%= product.Id %>')">+</button>
+                                <button class="quantity-button " onclick="incrementQuantity('<%= product.Id %>','<%=product.WarehouseId%>')">+</button>
                             </td>
                             <td id="<%= product.Id %>ProductTotal">$<%= product.Cost * product.Quantity %></td>
                             <td>
-                                <button class="btn btn-danger" onclick="removeProduct('<%= product.Id %>')">Remove</button>
+                                <button class="btn btn-danger" onclick="removeProduct('<%= product.Id %>','<%=product.WarehouseId%>')">Remove</button>
                             </td>
                         </tr>
                     <% }); %>
@@ -163,10 +166,10 @@
             })
         
         }
-        function addToCart(productId)
+        function addToCart(productId,warehouseId)
         {
-            const url = `http://localhost:8003/cart/${productId}?quantity=1`
-            getAuthToken()
+            const url = `http://localhost:8003/cart/${warehouseId}/${productId}?quantity=1`
+            return getAuthToken()
             .then(authToken=>
             {
                 return fetch(url,{
@@ -181,18 +184,28 @@
             })
             .then(result=>
             {
-                console.log('final ',result)
+                if(+result.statusCode!=200)
+                    throw new Error(result.message)
+                return true
             })
             .catch(err=>
             {
-                console.log(err)
+                console.log('error',err)
+                const alerts = document.getElementById("alerts")
+                const errorAlert = document.createElement('div')
+                errorAlert.setAttribute('class','alert alert-danger')
+                errorAlert.setAttribute('role','alert')
+                errorAlert.textContent = err.message
+                alerts.appendChild(errorAlert)
+                clearAlerts()
+                return false
             })
             })
         }
-        function removeFromCart(productId,quantity=1)
+        function removeFromCart(productId,warehouseId,quantity=1)
         {
-            const url = `http://localhost:8003/cart/${productId}?quantity=${quantity}`
-            getAuthToken()
+            const url = `http://localhost:8003/cart/${warehouseId}/${productId}?quantity=${quantity}`
+            return getAuthToken()
             .then(authToken=>
             {
                 return fetch(url,{
@@ -207,11 +220,14 @@
             })
             .then(result=>
             {
-                console.log('final ',result)
+                if(+result.statusCode!=200)
+                    throw new Error(result.message)
+                return true
             })
             .catch(err=>
             {
                 console.log(err)
+                return false
             })
             })
         }
@@ -243,24 +259,27 @@
             })
             })
         }
-        function incrementQuantity(productId) {
+        async function incrementQuantity(productId,warehouseId) {
             const costElement = document.getElementById(productId+'productCost')
             const quantityElement = document.getElementById(productId + 'Quantity');
             const productTotalElement = document.getElementById(productId + 'ProductTotal');
             const grandTotalElement = document.getElementById('GrandTotal')
             const QuantityToBeAdded = 1
 
-            const currentQuantity = parseInt(quantityElement.textContent);
-            quantityElement.textContent = currentQuantity + QuantityToBeAdded;
+            const productIsAdded = await addToCart(productId,warehouseId)
+            if(productIsAdded)
+            {
+                const currentQuantity = parseInt(quantityElement.textContent);
+                quantityElement.textContent = currentQuantity + QuantityToBeAdded;
 
-            productTotalElement.textContent = '$' +parseInt((QuantityToBeAdded * parseInt(costElement.textContent.substring(1))) + parseInt(productTotalElement.textContent.substring(1)))
+                productTotalElement.textContent = '$' +parseInt((QuantityToBeAdded * parseInt(costElement.textContent.substring(1))) + parseInt(productTotalElement.textContent.substring(1)))
 
-            grandTotalElement.textContent =  parseInt((QuantityToBeAdded * parseInt(costElement.textContent.substring(1))) + parseInt(grandTotalElement.textContent))
+                grandTotalElement.textContent =  parseInt((QuantityToBeAdded * parseInt(costElement.textContent.substring(1))) + parseInt(grandTotalElement.textContent))
+            }
             
-            addToCart(productId)
         }
         
-        function decrementQuantity(productId) {
+        async function decrementQuantity(productId,warehouseId) {
             const costElement = document.getElementById(productId+'productCost')
             const quantityElement = document.getElementById(productId + 'Quantity');
             const productTotalElement = document.getElementById(productId + 'ProductTotal');
@@ -271,7 +290,7 @@
 
             
             const currentQuantity = parseInt(quantityElement.textContent);
-            removeFromCart(productId)
+            removeFromCart(productId,warehouseId)
             if (currentQuantity > 1) {
                 quantityElement.textContent = currentQuantity - QuantityToBeRemoved;
                 productTotalElement.textContent = '$' +parseInt(parseInt(productTotalElement.textContent.substring(1)) - (QuantityToBeRemoved * parseInt(costElement.textContent.substring(1))))
@@ -287,7 +306,7 @@
             }
         }
         
-        function removeProduct(productId) {
+        function removeProduct(productId,warehouseId) {
             const costElement = document.getElementById(productId+'productCost')
             const quantityElement = document.getElementById(productId + 'Quantity');
             const grandTotalElement = document.getElementById('GrandTotal')
@@ -297,9 +316,9 @@
             if(+document.querySelectorAll('table tr').length==1)
             {
                 document.getElementById('ProductTable').remove()
-                document.getElementsByClassName('basket')[0].innerHTML = `<p class="mb-2 pb-3 pt-3 bg-info text-warning text-center" style="font-size: large;font-weight: bolder;border-radius: 5px;">Your basket is empty.</p>`
+                document.getElementsByClassName('basket')[0].innerHTML = `<p class="mb-2 pb-3 pt-3 bg-primary text-white text-center" style="font-size: larger;font-weight: bolder;border-radius: 5px;">Your basket is empty.</p>`
             }
-            removeFromCart(productId,+quantityElement.textContent)
+            removeFromCart(productId,warehouseId,+quantityElement.textContent)
         }
         // function CheckOut()
         // {

@@ -31,6 +31,11 @@ const SellerProducts = AzureMySqlSequelize.define('SellerProducts',
             model:"Products",
             key:"Id"
         }
+    },
+    IsWithSeller:
+    {
+        type:DataTypes.BOOLEAN,
+        defaultValue: false
     }
 })
 export default SellerProducts

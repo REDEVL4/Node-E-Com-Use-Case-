@@ -1,91 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Orders</title>
     <!-- Include Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
     <!-- Include Bootswatch Cosmo theme -->
     <!-- <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.2.3/dist/cosmo/bootstrap.min.css" rel="stylesheet"> -->
-    <link href="/css/bootstrap.css" rel="stylesheet">
-    <link href="/css/orderStyles.css" rel="stylesheet">
+    <link href="/css/bootstrap.css" rel="stylesheet" />
+    <link href="/css/orderStyles.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
-    <link href="/css/bootstrap.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-</head>
-<body>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9"
+      crossorigin="anonymous"
+    />
+    <link href="/css/bootstrap.css" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+  </head>
+  <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <a class="navbar-brand" href="/">E-Com</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-                <li class="nav-item <%= activePage === 'home' ? 'active' : '' %>">
-                    <a class="nav-link" href="/">Home</a>
-                </li>    
-            <%if(isLoggedIn===true){%>
-                    <li class="nav-item <%= activePage === 'cart' ? 'active' : '' %>">
-                        <a class="nav-link" href="/shop/cart"><i class="fa-solid fa-cart-shopping fa-bounce" style="color: #e1e3d7;"></i></a>
-                    </li>
-                    <li class="nav-item <%= activePage === 'orders' ? 'active' : '' %>">
-                        <a class="nav-link" href="/shop/orders">Orders</a>
-                    </li>                    
-                    <%if(IsSeller==true){%>
-                        <li class="nav-item <%= activePage === 'orders' ? 'active' : '' %>">
-                            <a class="nav-link" href="/admin"><%=UserName%> Page</a>
-                        </li>                        
-                    <%}%>
-                <%}else{%>
-                    <li class="nav-item <%= activePage === 'signIn' ? 'active' : '' %>">
-                        <a class="nav-link" href="/shop/users/signIn">Sign In</a>
-                    </li>                    
-                    <li class="nav-item <%= activePage === 'signUp' ? 'active' : '' %>">
-                        <a class="nav-link" href="/shop/users/signUp">Sign Up</a>
-                    </li>                    
-                <%}%>
-
-                <%if(isLoggedIn===true){%>
-                    <li class="nav-item <%= activePage === 'signOut' ? 'active' : '' %>">
-                    <form method="post" action="/shop/users/signOut">
-                        <button class="nav-link" type="submit"><i class="fa-solid fa-right-from-bracket fa-xl" style="color: #e8ec09;"></i></button>
-                    </form>
-                </li>
-                <%}%>
-            </ul>
-        </div>
+      <a class="navbar-brand" href="/">E-Com</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item <%= activePage === 'home' ? 'active' : '' %>">
+            <a class="nav-link" href="/shop">Home</a>
+          </li>
+          <%if(isLoggedIn===true){%>
+          <li class="nav-item <%= activePage === 'cart' ? 'active' : '' %>">
+            <a class="nav-link" href="/shop/cart"
+              ><i
+                class="fa-solid fa-cart-shopping fa-bounce"
+                style="color: #e1e3d7"
+              ></i
+            ></a>
+          </li>
+          <li class="nav-item <%= activePage === 'orders' ? 'active' : '' %>">
+            <a class="nav-link" href="/shop/orders">Orders</a>
+          </li>
+          <%if(IsSeller==true){%>
+          <li class="nav-item <%= activePage === 'orders' ? 'active' : '' %>">
+            <a class="nav-link" href="/shop/admin"><%=UserName%> Page</a>
+          </li>
+          <li class="nav-item <%= activePage === 'orders' ? 'active' : '' %>">
+            <a class="nav-link" href="/shop/admin/warehouses">Warehouses</a>
+        </li>                        
+          <%}%> <%}else{%>
+          <li class="nav-item <%= activePage === 'signIn' ? 'active' : '' %>">
+            <a class="nav-link" href="/shop/users/signIn">Sign In</a>
+          </li>
+          <li class="nav-item <%= activePage === 'signUp' ? 'active' : '' %>">
+            <a class="nav-link" href="/shop/users/signUp">Sign Up</a>
+          </li>
+          <%}%> <%if(isLoggedIn===true){%>
+          <li class="nav-item <%= activePage === 'signOut' ? 'active' : '' %>">
+            <form method="post" action="/shop/users/signOut">
+              <button class="nav-link" type="submit">
+                <i
+                  class="fa-solid fa-right-from-bracket fa-xl"
+                  style="color: #e8ec09"
+                ></i>
+              </button>
+            </form>
+          </li>
+          <%}%>
+        </ul>
+      </div>
     </nav>
-    <div id="alerts" style="position: fixed;top: 10px;right: 3%;">
-        <%if(message){%>
-            <%if(isSuccess){%>
-                <div class="alert alert-success" role="alert">
-                    <%=message%>
-                </div>
-            <%}else{%>
-                <div class="alert alert-danger" role="alert">
-                    <%=message%>
-                </div>
-            <%}%>        
-        <%}%>
+    <div id="alerts" style="position: fixed; top: 10px; right: 3%">
+      <%if(message){%> <%if(isSuccess){%>
+      <div class="alert alert-success" role="alert"><%=message%></div>
+      <%}else{%>
+      <div class="alert alert-danger" role="alert"><%=message%></div>
+      <%}%> <%}%>
     </div>
     <section class="orders">
-        <% if (Orders && Orders.length > 0) { %>
-            <ul class="order-list">
-                <% Orders.forEach(order => { %>
-                    <li class="order" id="<%= order.OrderId %>">
-                        <div class="order-header">
-                            <h2>Order : <span class="h6"><%= order.OrderId %></span></h2>
-                            <p>Order Status: <%if(order.OrderStatus=='placed'){%><span class="text-success"><%=order.OrderStatus%></span> <%}else if(order.OrderStatus=='pending'){%><span class="text-warning"><%=order.OrderStatus%></span><%}else{%><%=order.OrderStatus%><%}%></p>
-                        </div>
-                        <p>Total Cost: $<%= order.TotalCost.toFixed(2) %></p>
-                        <p>Order Placed At: <%= order.createdAt %></p>
-                        <hr>
-                        <div id="addressSelection" class="form-group" style="display: flex; flex-direction: row;flex-wrap: wrap; align-items: center; justify-content: center;">
-                            <div style="display: flex; flex-direction: column;flex-wrap: wrap; align-items: center; justify-content: center;">
-                                <span class="text-danger">Delivery Address</span>
-                                <textarea  disabled id="textarea" class="form-control" >
+      <% if (Orders && Orders.length > 0) { %>
+      <ul class="order-list">
+        <% Orders.forEach(order => { %>
+        <li class="order" id="<%= order.OrderId %>">
+          <div class="order-header">
+            <h2>Order : <span class="h6"><%= order.OrderId %></span></h2>
+            <p>
+              Order Status: <%if(order.OrderStatus=='placed'){%><span
+                class="text-success"
+                ><%=order.OrderStatus%></span
+              >
+              <%}else if(order.OrderStatus=='pending'){%><span
+                class="text-warning"
+                ><%=order.OrderStatus%></span
+              ><%}else{%><%=order.OrderStatus%><%}%>
+            </p>
+          </div>
+          <p>Total Cost: $<%= order.TotalCost.toFixed(2) %></p>
+          <p>Order Placed At: <%= order.createdAt %></p>
+          <hr />
+          <div
+            id="addressSelection"
+            class="form-group"
+            style="
+              display: flex;
+              flex-direction: row;
+              flex-wrap: wrap;
+              align-items: center;
+              justify-content: center;
+            "
+          >
+            <div
+              style="
+                display: flex;
+                flex-direction: column;
+                flex-wrap: wrap;
+                align-items: center;
+                justify-content: center;
+              "
+              class="form-group"
+              id="textarea-<%=order.OrderId%>"
+            >
+              <span class="text-danger">Delivery Address</span>
+              <textarea id="textarea" disabled class="form-control">
                                     <%if(order.OrderAddress){%>
                                         <%=(order.OrderAddress.AddressLine1+" "+order.OrderAddress.AddressLine2)%>,
                                         <%=order.OrderAddress.City%>,
@@ -96,212 +151,328 @@
                                         Delivery Order not set.
                                     <%}%>
                                 </textarea>
-                            </div>
-                            <%if(order.OrderStatus === 'pending'){%>
-                                <div class="btn-group dropright h-25">
-                                    <button type="button" class="btn btn-outline-secondary">
-                                      Select Delivery Address
-                                    </button>
-                                    <button id="myAddressDropdown" onclick="showDropdown('<%= order.OrderId %>')"  type="button" class="btn btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                      <span class="sr-only">Toggle Dropdright</span>
-                                    </button>
-                                    <div class="dropdown-menu" id="<%= order.OrderId %>-dropdown-menu"  x-placement="right-start" style="position: absolute; transform: translate3d(286px, 0px, 0px); top: 0px; left: 0px; will-change: transform;">
-                                      <!-- <a class="dropdown-item" href="#">A 1</a>
+            </div>
+            <%if(order.OrderStatus === 'pending'){%>
+            <div class="btn-group dropright h-25">
+              <button type="button" class="btn btn-outline-secondary">
+                Select Delivery Address
+              </button>
+              <button
+                id="myAddressDropdown"
+                onclick="showDropdown('<%= order.OrderId %>')"
+                type="button"
+                class="btn btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
+                <span class="sr-only">Toggle Dropdright</span>
+              </button>
+              <div
+                class="dropdown-menu"
+                id="<%= order.OrderId %>-dropdown-menu"
+                x-placement="right-start"
+                style="
+                  position: absolute;
+                  transform: translate3d(286px, 0px, 0px);
+                  top: 0px;
+                  left: 0px;
+                  will-change: transform;
+                "
+              >
+                <!-- <a class="dropdown-item" href="#">A 1</a>
                                       <a class="dropdown-item" href="#">A 2</a>
                                       <a class="dropdown-item" href="#">A 3</a>
                                       <div class="dropdown-divider"></div>
                                       <a class="dropdown-item" href="#">Add Address</a> -->
-                                    </div>
-                                  </div>
-                            <%}else{%>
-                            <%}%>
-                        </div>
-                        <div id="OrderOprButtons">
-                            <%if(order.OrderStatus!='placed'){%>
-                                <form method="post" action="/create-checkout-session/<%=order.OrderId%>">
-                                    <button type="submit" id="checkout-button" class="view-products-button btn btn-outline-success" >Place Order</button>
-                                </form>
-                                <button class="cancel-order-button btn btn-outline-danger" type="button" onclick="cancelOrder('<%= order.OrderId %>')">Cancel Order</button>
-    
-                                <%}else{%>
-                                <%}%>
-                            <button class="view-products-button btn btn-outline-info" onclick="toggleProducts('<%= order.OrderId %>')">View Products</button>
-                            <%if(order.OrderStatus=='placed'){%>
-                                    <a id="DownloadInvoice" target="_blank" href="/download/invoice/<%= order.OrderId %>"  class="view-products-button btn btn-outline-secondary" >Download Invoice</a>
-                            <%}%>
-                        </div>
-                        <div class="products" id="<%= order.OrderId %>Products">
-                            <h3>Products:</h3>
-                            <ul>
-                                <% order.Products.forEach(product => { %>
-                                    <li>
-                                        <img src="<%= product.ImageUrl %>" alt="<%= product.Name %>" />
-                                        <div>
-                                            <h4><%= product.Name %></h4>
-                                            <p>Unit Cost: <%= product.Cost %></p>
-                                            <p>Ordered Quantity: <%= product.OrderedQuantity %></p>
-                                        </div>
-                                    </li>
-                                <% }); %>
-                            </ul>
-                        </div>
-                    </li>
-                <% }); %>
+              </div>
+            </div>
+            <%}else{%> <%}%>
+          </div>
+          <div id="OrderOprButtons">
+            <%if(order.OrderStatus!='placed'){%>
+            <form
+              method="post"
+              action="/create-checkout-session/<%=order.OrderId%>"
+            >
+              <button
+                type="submit"
+                id="<%=order.OrderId%>-checkout-button"
+                class="view-products-button btn btn-outline-success"
+              >
+                Place Order
+              </button>
+            </form>
+            <button
+              class="cancel-order-button btn btn-outline-danger"
+              type="button"
+              onclick="cancelOrder('<%= order.OrderId %>')"
+            >
+              Cancel Order
+            </button>
+
+            <%}else{%> <%}%>
+            <button
+              class="view-products-button btn btn-outline-info"
+              onclick="toggleProducts('<%= order.OrderId %>')"
+            >
+              View Products
+            </button>
+            <%if(order.OrderStatus=='placed'){%>
+            <a
+              id="DownloadInvoice"
+              target="_blank"
+              href="/download/invoice/<%= order.OrderId %>"
+              class="view-products-button btn btn-outline-secondary"
+              >Download Invoice</a
+            >
+            <%}%>
+          </div>
+          <div class="products" id="<%= order.OrderId %>Products">
+            <h3>Products:</h3>
+            <ul>
+              <% order.Products.forEach(product => { %>
+              <li>
+                <img src="<%= product.ImageUrl %>" alt="<%= product.Name %>" />
+                <div>
+                  <h4><%= product.Name %></h4>
+                  <p>Unit Cost: <%= product.Cost %></p>
+                  <p>Ordered Quantity: <%= product.OrderedQuantity %></p>
+                </div>
+              </li>
+              <% }); %>
             </ul>
-        <% } else { %>
-            <p class="h4 bg-primary text-warning p-3 text-center">You have no orders yet.</p>
-        <% } %>
-        <input hidden id="UserName" value="<%=UserName%>"/>
-        <input hidden id="Password" value="<%=Password%>"/>
+          </div>
+        </li>
+        <% }); %>
+      </ul>
+      <% } else { %>
+      <p class="h4 bg-primary text-warning p-3 text-center">
+        You have no orders yet.
+      </p>
+      <% } %>
+      <input hidden id="UserName" value="<%=UserName%>" />
+      <input hidden id="Password" value="<%=Password%>" />
     </section>
     <script>
-        const getAuthToken = ()=>
-        {
-            console.log(JSON.stringify({
-                "UserName":`${document.getElementById('UserName').value}`,
-                "Password":`${document.getElementById('Password').value}`
-            }))
-            if(!document.getElementById('UserName').value || !document.getElementById('Password').value ) throw new Error('Need to be authenticated')
+      const getAuthToken = () => {
+        // console.log(JSON.stringify({
+        //     "UserName":`${document.getElementById('UserName').value}`,
+        //     "Password":`${document.getElementById('Password').value}`
+        // }))
+        if (
+          !document.getElementById("UserName").value ||
+          !document.getElementById("Password").value
+        )
+          throw new Error("Need to be authenticated");
 
-            return fetch('http://localhost:8003/auth/generateToken',{
-            method:'POST',
-            headers:{
-                'Content-Type':'application/json'
+        return fetch("http://localhost:8003/auth/generateToken", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            UserName: `${document.getElementById("UserName").value}`,
+            Password: `${document.getElementById("Password").value}`,
+          }),
+        })
+          .then((result) => {
+            // console.log(result)
+            return result.json();
+          })
+          .then((result) => {
+            // console.log(result)
+            return result.result.Token;
+          })
+          .catch((err) => {
+            console.log(err.message);
+          });
+      };
+      function toggleProducts(orderId) {
+        const productsDiv = document.getElementById(orderId + "Products");
+        productsDiv.classList.toggle("show-products");
+      }
+
+      function cancelOrder(orderId) {
+        getAuthToken().then((authToken) => {
+          const orderElement = document.getElementById(orderId);
+          const url = `http://localhost:8003/orders/delete/${orderId}`;
+          fetch(url, {
+            method: "delete",
+            headers: {
+              Authorization: `Bearer ${authToken}`,
             },
-            body:JSON.stringify({
-                "UserName":`${document.getElementById('UserName').value}`,
-                "Password":`${document.getElementById('Password').value}`
-            })})
-            .then(result=>
-            {
-                console.log(result)
-                return result.json()
+          })
+            .then((result) => {
+              return result.json();
             })
-            .then(result=>
-            {
-                console.log(result)
-                return result.result.Token
+            .then((result) => {
+              orderElement.remove();
+              if (document.querySelectorAll(".order").length == 0)
+                document.getElementsByClassName(
+                  "orders"
+                )[0].innerHTML = `<p class="h4 bg-primary text-warning p-3 text-center">You have no orders yet.</p>`;
             })
-            .catch(err=>
-            {
-                console.log(err.message)
-            })
-        
-        }
-        function toggleProducts(orderId) {
-            const productsDiv = document.getElementById(orderId + 'Products');
-            productsDiv.classList.toggle('show-products');
-        }
-
-        function cancelOrder(orderId) {
-            getAuthToken()
-            .then(authToken=>
-            {
-            const orderElement = document.getElementById(orderId)
-            const url = `http://localhost:8003/orders/delete/${orderId}`
-            fetch(url,{
-                method:'delete',
-                headers:{
-                    "Authorization":`Bearer ${authToken}`
-                }
-            }).then(result=>
-            {
-                return result.json()
-            })
-            .then(result=>
-            {
-                orderElement.remove()
-                if(document.querySelectorAll('.order').length==0)
-                    document.getElementsByClassName('orders')[0].innerHTML=`<p class="h4 bg-primary text-warning p-3 text-center">You have no orders yet.</p>`
-            })
-            .catch(err=>
-            {
-                console.log(err)
-            })
-            }
-            )                
-        }
-        const clearAlerts = function()
-        {
-            document.querySelectorAll('.alert').forEach(alertElement=>
-            {
-            setTimeout(()=>
-            {
-                document.getElementsByClassName(alertElement.className)[0].remove()
-            },2000)
-            })
-        }
-        clearAlerts()
-        const showDropdown = (orderId)=>
-        {
-            const dropdownElement = document.getElementById(`${orderId}-dropdown-menu`)
-            console.log(dropdownElement)
-            if(dropdownElement.getAttribute('class') === 'dropdown-menu show')
-            {
-                dropdownElement.setAttribute('class','dropdown-menu')
-                dropdownElement.childNodes.length
-                dropdownElement.innerHTML = '<div class="dropdown-item" >Add Address</div>'
-            }
-            else
-            {
-                getAuthToken()
-            .then(authToken=>
-            {
-                const url = `http://localhost:8003/useraddress`;
-                fetch(url,{
-                method:'get',
-                headers:{
-                    "Authorization":`Bearer ${authToken}`
-                }})
-                .then(result=>result.json())
-                .then(result=>
-                {
-                    const parser = new DOMParser()
-                    if(result.statusCode===200)
-                    {
-                        const addresses = result.result
-                        dropdownElement.innerHTML = null
-                        addresses.forEach(address=>
-                        {
-                            const fullAddress = address.AddressLine1+", "+address.AddressLine2+", "+address.City+", "+address.State+", "+address.ZipCode+", "+address.Country
-                            const addElement = `<div onclick={setOrderAddress} class="dropdown-item" style="width:300px;white-space: normal;display:block" onmouseover="this.style.color = 'white'; this.style.backgroundColor = 'black';" onmouseout="this.style.color = 'black'; this.style.backgroundColor = 'white';">${fullAddress}</div>`
-                            dropdownElement.append(parser.parseFromString(addElement,'text/html').body.firstChild)
-                            dropdownElement.append(parser.parseFromString(`<div class="dropdown-divider"></div>`,'text/html').body.firstChild)
-                        })
+            .catch((err) => {
+              console.log(err);
+            });
+        });
+      }
+      const clearAlerts = function () {
+        document.querySelectorAll(".alert").forEach((alertElement) => {
+          setTimeout(() => {
+            document.getElementsByClassName(alertElement.className)[0].remove();
+          }, 2000);
+        });
+      };
+      clearAlerts();
+      const showDropdown = (orderId) => {
+        const dropdownElement = document.getElementById(
+          `${orderId}-dropdown-menu`
+        );
+        // console.log(dropdownElement)
+        if (dropdownElement.getAttribute("class") === "dropdown-menu show") {
+          dropdownElement.setAttribute("class", "dropdown-menu");
+          dropdownElement.childNodes.length;
+          dropdownElement.innerHTML =
+            '<div class="dropdown-item" >Add Address</div>';
+        } else {
+          getAuthToken()
+            .then((authToken) => {
+              const url = `http://localhost:8003/useraddress`;
+              fetch(url, {
+                method: "get",
+                headers: {
+                  Authorization: `Bearer ${authToken}`,
+                },
+              })
+                .then((result) => result.json())
+                .then((result) => {
+                  const parser = new DOMParser();
+                  if (result.statusCode === 200) {
+                    const addresses = result.result;
+                    dropdownElement.innerHTML = null;
+                    addresses.forEach((address) => {
+                      console.log(address);
+                      const fullAddress =
+                        address.AddressLine1 +
+                        ", " +
+                        address.AddressLine2 +
+                        ", " +
+                        address.City +
+                        ", " +
+                        address.State +
+                        ", " +
+                        address.ZipCode +
+                        ", " +
+                        address.Country;
+                      const addElement = `<button onclick="setOrderAddress('${orderId}','${address.Id}','${address}')" class="dropdown-item" style="width:300px;white-space: normal;display:block" onmouseover="this.style.color = 'white'; this.style.backgroundColor = 'black';" onmouseout="this.style.color = 'black'; this.style.backgroundColor = 'white';">${fullAddress}</button>`;
+                      dropdownElement.append(
+                        parser.parseFromString(addElement, "text/html").body
+                          .firstChild
+                      );
+                      dropdownElement.append(
+                        parser.parseFromString(
+                          `<div class="dropdown-divider"></div>`,
+                          "text/html"
+                        ).body.firstChild
+                      );
+                    });
                     // if(addresses.length>0)
                     //     dropdownElement.append(parser.parseFromString(`<div class="dropdown-divider"></div>`,'text/html').body.firstChild)
-                    dropdownElement.append(parser.parseFromString(`<div class="dropdown-item" onmouseover="this.style.color = 'white'; this.style.backgroundColor = 'black';" onmouseout="this.style.color = 'black'; this.style.backgroundColor = 'white';" >Add Address</div>`,'text/html').body.firstChild)
-                    dropdownElement.setAttribute('class','dropdown-menu show')
-                    }
+                    dropdownElement.append(
+                      parser.parseFromString(
+                        `<div class="dropdown-item" onmouseover="this.style.color = 'white'; this.style.backgroundColor = 'black';" onmouseout="this.style.color = 'black'; this.style.backgroundColor = 'white';" >Add Address</div>`,
+                        "text/html"
+                      ).body.firstChild
+                    );
+                    dropdownElement.setAttribute("class", "dropdown-menu show");
+                  }
                 })
-                .catch(err=>console.log(err))
+                .catch((err) => console.log(err));
             })
-            .catch(err=>
-            {
-                console.log(err)
-            })
-            }
+            .catch((err) => {
+              console.log(err);
+            });
         }
-        const setOrderAddress = (orderId, addressId, address)=>
-        {
-            getAuthToken()
-            .then(authToken=>
-            {
-                const url = `http://localhost:8003/useraddress`;
-                fetch(url,{
-                method:'get',
-                headers:{
-                    "Authorization":`Bearer ${authToken}`
-                }})
-                .then(result=>result.json())
-                .then(result=>
-                {
-
-                })
-                .catch(err=>console.log(err))
+      };
+      const setOrderAddress = (orderId, addressId, address) => {
+        console.log("setOrderAddress called with", orderId, addressId, address);
+        getAuthToken()
+          .then((authToken) => {
+            const url = `http://localhost:8003/useraddress?excludeAddressType=seller`;
+            fetch(url, {
+              method: "get",
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+              },
             })
-            .catch(err=>console.log(err))
-        } 
+              .then((result) => result.json())
+              .then((result) => {
+                console.log('address',result)
+                const addressDetails = result.result[0];
+                if (addressDetails) {
+                  ///orders/:orderId/:addressId
+                  const url = `http://localhost:8003/orders/${orderId}/${addressId}`;
+                  fetch(url, {
+                    method: "post",
+                    headers: {
+                      Authorization: `Bearer ${authToken}`,
+                    },
+                  })
+                    .then((response) => response.json())
+                    .then((result) => {
+                      console.log(result);
+
+                      //setting delivery address
+                      const fullAddress =
+                        addressDetails.AddressLine1 +
+                        ", " +
+                        addressDetails.AddressLine2 +
+                        ", " +
+                        addressDetails.City +
+                        ", " +
+                        addressDetails.State +
+                        ", " +
+                        addressDetails.ZipCode +
+                        ", " +
+                        addressDetails.Country;
+                      document.querySelectorAll(`#textarea-${orderId} textarea`)[0].innerText =
+                        fullAddress;
+
+                      //collapse dropdown
+                      const dropdownElement = document.getElementById(
+                        `${orderId}-dropdown-menu`
+                      );
+                      if (
+                        dropdownElement.getAttribute("class") ===
+                        "dropdown-menu show"
+                      ) {
+                        dropdownElement.setAttribute("class", "dropdown-menu");
+                        // dropdownElement.childNodes.length;
+                        // dropdownElement.innerHTML =
+                        //   '<div class="dropdown-item" >Add Address</div>';
+                      }
+                    })
+                    .catch((err) => console.log(err));
+                }
+              })
+              .catch((err) => console.log(err));
+            // const url = `http://localhost:8003/orders/${orderId}/${addressId}`;
+            //         fetch(url,{
+            //         method:'post',
+            //         headers:{
+            //         "Authorization":`Bearer ${authToken}`
+            //                }})
+            //                .then(response=>response.json())
+            //                .then(result=>
+            //                {
+            //                     console.log(result)
+            //                })
+            //                .catch(err=>console.log(err))
+          })
+          .catch((err) => console.log(err));
+      };
     </script>
-</body>
+  </body>
 </html>

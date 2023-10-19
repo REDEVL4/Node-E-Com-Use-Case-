@@ -2,6 +2,12 @@ import { DataTypes } from "sequelize";
 import AzureMySqlSequelize from "../Utils/AzureMySqlSequelize.js";
 const WarehouseProducts = AzureMySqlSequelize.define('WarehouseProducts',
 {
+    // Id:
+    // {
+    //     type:DataTypes.UUID,
+    //     allowNull:false,
+    //     primaryKey: true
+    // }, 
     ProductId:
     {
         type:DataTypes.UUID,
@@ -24,7 +30,7 @@ const WarehouseProducts = AzureMySqlSequelize.define('WarehouseProducts',
     },
     Quantity:
     {
-        type:DataTypes.DOUBLE,
+        type:DataTypes.INTEGER,
         defaultValue:0
     }   
 })

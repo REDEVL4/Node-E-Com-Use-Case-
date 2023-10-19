@@ -1,6 +1,7 @@
 import { Router } from "express";
-import { GetAllWarehouses,GetWarehousesById,CreateWarehouse,UpdateWarehouse,DeleteWarehouse,CreateWarehouseInbulk, GetAllWarehouseSellers, AssociateSellerWithWarehouse, GetMyAssociatedWarehouses} from "../Controllers/WarehouseController.js";
+import { GetAllWarehouses,GetWarehousesById,GetWarehouseOrders,CreateWarehouse,UpdateWarehouse,DeleteWarehouse,CreateWarehouseInbulk, GetAllWarehouseSellers, AssociateSellerWithWarehouse, GetMyAssociatedWarehouses} from "../Controllers/WarehouseController.js";
 const WarehouseRoutes = Router()
+WarehouseRoutes.get('/warehouseOrders',GetWarehouseOrders)
 WarehouseRoutes.get('/associate',GetMyAssociatedWarehouses)
 WarehouseRoutes.get('/sellers/:id',GetAllWarehouseSellers)
 WarehouseRoutes.get('/:id',GetWarehousesById)

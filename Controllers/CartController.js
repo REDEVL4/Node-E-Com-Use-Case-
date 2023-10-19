@@ -2,6 +2,7 @@ import Cart from "../Models/Cart.js";
 import User from "../Models/User.js";
 import Product from "../Models/Product.js";
 import { Op } from "sequelize";
+import Seller from "../Models/Seller.js";
 export const GetCart = async(req,res,next)=>
 {
     try
@@ -17,6 +18,7 @@ export const GetCart = async(req,res,next)=>
             CreatedAt:userCart.CreatedAt,
             UpdatedAt:userCart.UpdatedAt,
             Products:userCart.Products.map(product=>({
+                WarehouseId: product.CartProducts.WarehouseId,
                 Id: product.Id,
                 Name: product.Name,
                 Description: product.Description,
@@ -60,10 +62,11 @@ export const AddProductToCart = async(req,res,next)=>
 {
     try
     {
-        const {id:productId} = req.params
+        const {productId, warehouseId} = req.params
         const quantity = req.query.quantity?+req.query.quantity:1
         const user = await User.findByPk(req.session.userId)
-        if(!user) throw new Error(`User must be authenticated to continue`)
+        if(!user) throw new Error(`User must be authenticated to continue!`)
+        if(!warehouseId) throw new Error('Invalid request, Warehouse Id is missing!')
         let userCart = await user.getCart()
         if(!userCart)
             userCart = await user.createCart()
@@ -72,6 +75,9 @@ export const AddProductToCart = async(req,res,next)=>
         {
             const existingProduct = await userCart.getProducts({where:{Id:productId}})
             console.log(existingProduct)
+            const SellerProduct = await Product.findOne({where:{Id: productId},include:[{model:Seller, through:{attributes:["Quantity"]}}]})
+            if(!(SellerProduct.Sellers[0].SellerProducts.Quantity >= +existingProduct[0].CartProducts.Quantity+quantity))
+                throw new Error(`requested Quantity is unavailable at the moment!`)
             await userCart.addProduct(existingProduct[0],{through:{Quantity:+existingProduct[0].CartProducts.Quantity+quantity}})
             userCart.TotalCost = (parseFloat(userCart.TotalCost) + quantity * existingProduct[0].Cost).toFixed(4)
             await userCart.save()
@@ -79,7 +85,10 @@ export const AddProductToCart = async(req,res,next)=>
         else
         {
             const productToAdd = await Product.findByPk(productId)
-            const cartProduct = await userCart.addProduct(productToAdd,{through:{Quantity:quantity}})
+            const SellerProduct = (await productToAdd.getSellers())[0]
+            if(!(SellerProduct.SellerProducts.Quantity >= +quantity))
+                throw new Error(`requested Quantity is unavailable at the moment!`)
+            const cartProduct = await userCart.addProduct(productToAdd,{through:{Quantity:quantity,WarehouseId:warehouseId}})
             userCart.TotalCost = (parseFloat(userCart.TotalCost) + quantity * productToAdd.Cost).toFixed(4)
             await userCart.save()
         }
@@ -98,10 +107,11 @@ export const RemoveProductFromCart = async(req,res,next)=>
 {
     try
     {
-        const {id:productId} = req.params 
+        const {productId,warehouseId} = req.params 
         const quantity = req.query.quantity?+req.query.quantity:1
         const user = await User.findByPk(req.session.userId)
         if(!user) throw new Error(`User must be authenticated to continue`)
+        if(!warehouseId) throw new Error('Invalid request, Warehouse Id is missing!')
         let userCart = await user.getCart()
         if(userCart)
         {
@@ -173,6 +183,7 @@ export const RenderCart = async(req,res,next)=>
                 ManufacturedOn: product.ManufacturedOn,
                 ManufacturedBy: product.ManufacturedBy,
                 Quantity: product.CartProducts.Quantity,
+                WarehouseId: product.CartProducts.WarehouseId,
                 IsAvailableInStock: product.CartProducts.IsAvailableInStock
             }))
         }

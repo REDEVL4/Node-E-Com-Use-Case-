@@ -41,6 +41,7 @@ export const CreateUser = async(req,res,next)=>
     {
         const userDetails = {...req.body}
         if(userDetails.IsSeller && !userDetails.SellerName) throw {statusCode:400, message:`Seller Name is required for enrolling as a seller`}
+        if(userDetails.IsAdmin && !userDetails.AdminName) throw {statusCode:400, message:`Admin Name is required for enrolling as a Admin`}
         
         //checking for existsnce
         const foundUser = await User.findOne({where:{UserName:userDetails.Email}})
@@ -59,6 +60,18 @@ export const CreateUser = async(req,res,next)=>
                 User:newUser
             }})
             
+        }
+        if(newUser.IsAdmin)
+        {
+            const admin = await newUser.createAdmin({Name:userDetails.AdminName})
+            console.log(`User:${newUser.Id} is registered as Admin:${admin.Id}`)
+
+            //    await publishEventtoServiceBus("userqueue","user_created",{message:'User is created'})
+
+            return res.status(200).json({statusCode:200,message:`user:${newUser.Id} is created as Admin successfully`,result:{
+                User:newUser
+            }})
+
         }
         return res.status(200).json({statusCode:200,message:`user:${newUser.Id} creation successful`,result:{
             User:newUser
@@ -127,10 +140,15 @@ export const getUserAddress = async(req,res,next)=>
 {
     try
     {
+        const {addressType, excludeAddressType} = req.query
+        let addressFilters = {}
+        let excludeFilters = {}
+        if(addressType) addressFilters = {AddressType: addressType}
+        if(excludeAddressType) excludeFilters = {AddressType: {[Op.not]:[excludeAddressType]} }
         if(!req.session.userId) throw new Error(`User must be authenticated to continue`)
         const user = await User.findByPk(req.session.userId)
         if(!user) throw {statusCode:422,message:`User: ${req.session.userId} does not exists.`}
-        const userAddressList = await user.getUserAddresses()
+        const userAddressList = await user.getUserAddresses({where:{...addressFilters,...excludeFilters}})
         return res.status(200).json({statusCode:200, message:`User:${req.session.userId} addresses fetched `,result:userAddressList})
     }
     catch(err)
@@ -268,7 +286,7 @@ export const SignInPost = async(req,res,next)=>
         req.session.IsSeller = foundUser.IsSeller
         res.locals.message= 'SignIn successful'
         res.locals.isSuccess=true    
-        return res.redirect('/')
+        return res.redirect('/shop')
     }
     catch(err)
     {
@@ -320,7 +338,7 @@ export const SignUpPost = async(req,res,next)=>
         await newUser.createUserAddress({AddressType, AddressLine1, AddressLine2, ZipCode, City, State, Country})
         res.locals.message='SignUp successful'
         res.locals.isSuccess=true    
-        await publishEventtoServiceBus("userqueue","test",{message:'SignUp sucessful'})
+        // await publishEventtoServiceBus("userqueue","test",{message:'SignUp sucessful'})
         return res.redirect('/shop/users/signIn')
     }
     catch(err)

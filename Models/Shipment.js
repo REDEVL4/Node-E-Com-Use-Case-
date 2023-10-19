@@ -11,7 +11,7 @@ const Shipment = AzureMySqlSequelize.define('Shipment',
     Status:
     {
         type:DataTypes.STRING,
-        values:["initiated","to be shipped","shipped","to be delivered","delivered","cancelled"],
+        values:["initiated","to be delivered","delivered","cancelled"],
         allowNull:false
     },
     UserId:

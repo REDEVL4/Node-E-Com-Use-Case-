@@ -1,0 +1,79 @@
+http:
+  port: 8080
+admin:
+  port: 9876
+  host: localhost
+
+apiEndpoints:
+  users:
+    host: 'localhost'
+    paths: '/users/**'
+  products:
+    host: 'localhost'
+    paths: '/products/**'
+  cart:
+    host: 'localhost'
+    paths: '/cart/**'
+  orders:
+    host: 'localhost'
+    paths: '/orders/**'
+  userAddress:
+    host: 'localhost'
+    paths: '/userAddress/**'
+  warehouse:
+    host: 'localhost'
+    paths: '/warehouse/**'
+  shipment:
+    host: 'localhost'
+    paths: '/shipment/**'
+  views:
+    host: 'localhost'
+    paths: ['/shop/**']
+
+
+serviceEndpoints:
+  adminBackend:
+    url: 'http://localhost:9876'
+  eComService:
+    url: 'http://localhost:8003' # Update with the URL of your e-commerce project
+
+policies:
+  - rate-limit
+  - proxy
+  - log
+  - cors
+pipelines:
+  default:
+    apiEndpoints:
+      - users
+      - products
+      - cart
+      - orders
+      - userAddress
+      - warehouse
+      - shipment
+      - views
+    policies:
+      - log:
+          - action:
+               message: '${req.method} call made at route:${req.originalUrl} from ip:${req.ip}'
+      - cors:
+          -
+            action:
+              orgin: '*'
+              methods: 'HEAD,OPTIONS,PUT,PATCH,POST,DELETE,GET'
+              optionsSuccessStatus: 204
+
+      - rate-limit:
+          - 
+            action:
+              max: 1
+              windowMs: 60000
+              message: 'Too many requests, please try again later.'
+              statusCode: 429
+              rateLimitBy: "${req.ip}"
+      
+      - proxy:
+        - action:
+            serviceEndpoint: eComService
+            changeOrgin: true

@@ -4,6 +4,7 @@ import User from "../Models/User.js";
 import UserAddress from "../Models/UserAddress.js";
 import Warehouse from "../Models/Warehouse.js";
 import { Op } from "sequelize";
+import WarehouseProducts from "../Models/WarehouseProducts.js";
 export const GetAllProducts = async(req,res,next)=>
 {
     try
@@ -32,7 +33,7 @@ export const GetAllProducts = async(req,res,next)=>
             {
                 model:Seller,
                 where:sellerIdfilter,
-                through:{attributes:["Quantity"]},
+                // through:{attributes:["Quantity"], where:{Quantity:{[Op.gt]:0}}},
                 include:
                 [
                     {
@@ -45,10 +46,52 @@ export const GetAllProducts = async(req,res,next)=>
                                 where:{...addressfilter}
                             }
                         ]
+                    },
+                    {
+                        model: Warehouse,
+                        where: { ZipCode: req.session.location.zipCode},
+                        attributes:["Id"]
                     }
                 ],
             },
         ]})
+        // const warehouseDetails = productsResult.map(warehouse=>
+        //     {
+        //         return warehouse.Sellers.map(seller=>
+        //             {
+        //                 return seller.Products.map(product=>({
+        //                     Id: product.Id,
+        //                     Name: product.Name,
+        //                     Description: product.Description,
+        //                     Cost: product.Cost,
+        //                     ImageUrl: product.ImageUrl,
+        //                     Category: product.Category,
+        //                     SubCategory: product.SubCategory,
+        //                     ManufacturedOn: product.ManufacturedOn,
+        //                     ManufacturedBy: product.ManufacturedBy,
+        //                     AvailabileQuantity: product.SellerProducts.Quantity,
+        //                     WarehouseInfo:{
+        //                         warehouseId: warehouse.Id,
+        //                     },
+        //                     SellerInfo:{
+        //                         SellerId: seller.Id,
+        //                         UserId: seller.User.Id,
+        //                         SellerName: seller.User.PreferredName,
+        //                         SellerEmail: seller.User.Email,
+        //                         SellerAddress:
+        //                         {
+        //                             AddressLine1: seller.User.UserAddresses[0].AddressLine1,
+        //                             AddressLine2: seller.User.UserAddresses[0].AddressLine2,
+        //                             ZipCode: seller.User.UserAddresses[0].ZipCode,
+        //                             City: seller.User.UserAddresses[0].City,
+        //                             State: seller.User.UserAddresses[0].State,
+        //                             Country: seller.User.UserAddresses[0].Country
+        //                         }
+        //                     }
+        //                     }))
+        //             })
+        //     })
+        // return res.json({message:req.session.location ,warehouse: warehouseDetails})
         const productsdataWithSellerInfo = productsResult.map(product=>(            {
             Id: product.Id,
             Name: product.Name,
@@ -74,6 +117,9 @@ export const GetAllProducts = async(req,res,next)=>
                     State: product.Sellers[0].User.UserAddresses[0].State,
                     Country: product.Sellers[0].User.UserAddresses[0].Country
                 }
+            },
+            WarehouseInfo:{
+                WarehouseId: product.Sellers[0].Warehouses[0].Id
             }
             })) 
         let message
@@ -375,48 +421,84 @@ export const RenderAllShopProducts = async(req,res,next)=>
 {
     try
     {
-        const {Zipcode,City,State,Country,sellerName,SellerId,ProductName,Category,SubCategory,MinCost,MaxCost} = req.query
+        // const {Zipcode,City,State,Country,sellerName,SellerId,ProductName,Category,SubCategory,MinCost,MaxCost} = req.query
         let addressfilter = {}
         let sellerfilter = {}
         let sellerIdfilter={}
         let productFilters = {}
-        if(Zipcode) addressfilter = {...addressfilter,Zipcode:Zipcode} 
-        if(City) addressfilter = {...addressfilter,City:City} 
-        if(State) addressfilter = {...addressfilter,State:State} 
-        if(Country) addressfilter = {...addressfilter,Country:Country} 
-        if(sellerName) sellerfilter = {...sellerfilter,FirstName:sellerName}
-        if(SellerId) sellerIdfilter = {...sellerIdfilter,Id:SellerId}
-        if(ProductName) productFilters = {...productFilters,Name:{[Op.regexp]:`.*${ProductName}.*`}}
-        if(Category) productFilters = {...productFilters,Category:Category}
-        if(SubCategory) productFilters = {...productFilters,SubCategory:SubCategory}
-        if(MinCost && MaxCost) productFilters = {...productFilters,Cost:{[Op.between]:[MinCost,MaxCost]}}
-        else if (MinCost) productFilters = {...productFilters,Cost:{[Op.gt]:MinCost}}
-        else if (MaxCost) productFilters = {...productFilters,Cost:{[Op.lt]:MaxCost}}
+        let warehousefilters = {}
+        // if(Zipcode) addressfilter = {...addressfilter,Zipcode:Zipcode} 
+        // if(City) addressfilter = {...addressfilter,City:City} 
+        // if(State) addressfilter = {...addressfilter,State:State} 
+        // if(Country) addressfilter = {...addressfilter,Country:Country} 
+        // if(sellerName) sellerfilter = {...sellerfilter,FirstName:sellerName}
+        // if(SellerId) sellerIdfilter = {...sellerIdfilter,Id:SellerId}
+        // if(ProductName) productFilters = {...productFilters,Name:{[Op.regexp]:`.*${ProductName}.*`}}
+        // if(Category) productFilters = {...productFilters,Category:Category}
+        // if(SubCategory) productFilters = {...productFilters,SubCategory:SubCategory}
+        // if(MinCost && MaxCost) productFilters = {...productFilters,Cost:{[Op.between]:[MinCost,MaxCost]}}
+        // else if (MinCost) productFilters = {...productFilters,Cost:{[Op.gt]:MinCost}}
+        // else if (MaxCost) productFilters = {...productFilters,Cost:{[Op.lt]:MaxCost}}
         //change
-        let productsResult = await Product.findAll({
-            where:productFilters,
-            include:[
-            {
-                model:Seller,
-                where:sellerIdfilter,
-                // through:{attributes:["Quantity"], where:{Quantity:{[Op.gt]:0}}},
-                include:
-                [
-                    {
-                        model:User,
-                        where:{IsSeller:true, ...sellerfilter},
-                        include:[
-                            {
-                                model:UserAddress,
-                                attributes:["AddressType","AddressLine1","AddressLine2","ZipCode","City","State","Country"],
-                                where:{...addressfilter}
-                            }
-                        ]
-                    }
+        // let productsResult = await Warehouse.findAll({
+        //     where: { ...warehousefilters },
+        //     include: [
+        //       {
+        //         model: Seller,
+        //         include: [
+        //             {
+        //                 model:User,
+        //                 where:{IsSeller:true},
+        //                 include:[
+        //                     {
+        //                         model:UserAddress,
+        //                         attributes:["AddressType","AddressLine1","AddressLine2","ZipCode","City","State","Country"]
+        //                     }
+        //                 ]
+        //              },
+        //              {
+        //             model: Product
+        //              },
+        //         ],
+        //       },
+        //     ],
+        //   });
+        // return res.json({message: productsResult})
+        //new 
+        // let warehouseProducts = await Warehouse.findOne({where:{City: req.session.location.city}, include:[{model: Product, include:[{model: Seller, include:[{model:User, include:[{model: UserAddress, where:{ AddressType:'seller'}}]}]}]}]})
+        let warehouseProducts = await Warehouse.findOne({
+            where: { City: req.session.location.city },
+            include: [
+              {
+                model: Product,
+                through: { attributes: ["Quantity"], as: "Availability" },
+                include: [
+                  {
+                    model: Seller,
+                    through: { attributes: [] },
+                    include: [
+                      {
+                        model: User,
+                        attributes: ["Id", "UserName", "Email"],
+                        required: false, // This prevents the User join from being an inner join
+                        include: [
+                          {
+                            model: UserAddress,
+                            attributes: ["Id", "AddressType", "AddressLine1", "AddressLine2", "ZipCode", "City", "State", "Country"],
+                            where: { AddressType: "seller" },
+                            required: false, // This prevents the UserAddress join from being an inner join
+                            separate: true, // This makes User and UserAddress separate queries
+                          },
+                        ],
+                      },
+                    ],
+                  },
                 ],
-            },
-        ]})
-        const productsdataWithSellerInfo = productsResult.map(product=>(            {
+              },
+            ],
+          });
+          
+          const productsdataWithSellerInfo = warehouseProducts.Products.map(product=>(            {
             Id: product.Id,
             Name: product.Name,
             Description: product.Description,
@@ -426,7 +508,7 @@ export const RenderAllShopProducts = async(req,res,next)=>
             SubCategory: product.SubCategory,
             ManufacturedOn: product.ManufacturedOn,
             ManufacturedBy: product.ManufacturedBy,
-            AvailabileQuantity: product.Sellers[0].SellerProducts.Quantity,
+            AvailabileQuantity: product.Availability.Quantity,
             SellerInfo:{
                 SellerId: product.Sellers[0].Id,
                 UserId: product.Sellers[0].User.Id,
@@ -441,8 +523,108 @@ export const RenderAllShopProducts = async(req,res,next)=>
                     State: product.Sellers[0].User.UserAddresses[0].State,
                     Country: product.Sellers[0].User.UserAddresses[0].Country
                 }
+            },
+            WarehouseInfo:{
+                WarehouseId: warehouseProducts.Id
             }
             })) 
+        // return res.json({warehouseProducts})
+        //latest
+        // let productsResult = await Product.findAll({
+        //     where:productFilters,
+        //     include:[
+        //     {
+        //         model:Seller,
+        //         where:sellerIdfilter,
+        //         // through:{attributes:["Quantity"], where:{Quantity:{[Op.gt]:0}}},
+        //         include:
+        //         [
+        //             {
+        //                 model:User,
+        //                 where:{IsSeller:true, ...sellerfilter},
+        //                 include:[
+        //                     {
+        //                         model:UserAddress,
+        //                         attributes:["AddressType","AddressLine1","AddressLine2","ZipCode","City","State","Country"],
+        //                         where:{...addressfilter}
+        //                     }
+        //                 ]
+        //             },
+        //             {
+        //                 model: Warehouse,
+        //                 where: {...warehousefilters},
+        //                 attributes:["Id"]
+        //             }
+        //         ],
+        //     },
+        // ]})
+        // const warehouseDetails = productsResult.map(warehouse=>
+        //     {
+        //         return warehouse.Sellers.map(seller=>
+        //             {
+        //                 return seller.Products.map(product=>({
+        //                     Id: product.Id,
+        //                     Name: product.Name,
+        //                     Description: product.Description,
+        //                     Cost: product.Cost,
+        //                     ImageUrl: product.ImageUrl,
+        //                     Category: product.Category,
+        //                     SubCategory: product.SubCategory,
+        //                     ManufacturedOn: product.ManufacturedOn,
+        //                     ManufacturedBy: product.ManufacturedBy,
+        //                     AvailabileQuantity: product.SellerProducts.Quantity,
+        //                     WarehouseInfo:{
+        //                         warehouseId: warehouse.Id,
+        //                     },
+        //                     SellerInfo:{
+        //                         SellerId: seller.Id,
+        //                         UserId: seller.User.Id,
+        //                         SellerName: seller.User.PreferredName,
+        //                         SellerEmail: seller.User.Email,
+        //                         SellerAddress:
+        //                         {
+        //                             AddressLine1: seller.User.UserAddresses[0].AddressLine1,
+        //                             AddressLine2: seller.User.UserAddresses[0].AddressLine2,
+        //                             ZipCode: seller.User.UserAddresses[0].ZipCode,
+        //                             City: seller.User.UserAddresses[0].City,
+        //                             State: seller.User.UserAddresses[0].State,
+        //                             Country: seller.User.UserAddresses[0].Country
+        //                         }
+        //                     }
+        //                     }))
+        //             })
+        //     })
+        // return res.json({message:req.session.location ,warehouse: warehouseDetails})
+        // const productsdataWithSellerInfo = productsResult.map(product=>(            {
+        //     Id: product.Id,
+        //     Name: product.Name,
+        //     Description: product.Description,
+        //     Cost: product.Cost,
+        //     ImageUrl: product.ImageUrl,
+        //     Category: product.Category,
+        //     SubCategory: product.SubCategory,
+        //     ManufacturedOn: product.ManufacturedOn,
+        //     ManufacturedBy: product.ManufacturedBy,
+        //     AvailabileQuantity: product.Sellers[0].SellerProducts.Quantity,
+        //     SellerInfo:{
+        //         SellerId: product.Sellers[0].Id,
+        //         UserId: product.Sellers[0].User.Id,
+        //         SellerName: product.Sellers[0].User.PreferredName,
+        //         SellerEmail: product.Sellers[0].User.Email,
+        //         SellerAddress:
+        //         {
+        //             AddressLine1: product.Sellers[0].User.UserAddresses[0].AddressLine1,
+        //             AddressLine2: product.Sellers[0].User.UserAddresses[0].AddressLine2,
+        //             ZipCode: product.Sellers[0].User.UserAddresses[0].ZipCode,
+        //             City: product.Sellers[0].User.UserAddresses[0].City,
+        //             State: product.Sellers[0].User.UserAddresses[0].State,
+        //             Country: product.Sellers[0].User.UserAddresses[0].Country
+        //         }
+        //     },
+        //     WarehouseInfo:{
+        //         WarehouseId: product.Sellers[0].Warehouses[0].Id
+        //     }
+        //     })) 
         let message
         let plength = productsdataWithSellerInfo.length
         if(plength >1) message = `Only ${plength} products exists with the defined search creteria`

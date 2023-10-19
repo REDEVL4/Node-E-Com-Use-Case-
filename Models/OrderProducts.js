@@ -2,6 +2,11 @@ import { DataTypes } from "sequelize"
 import AzureMySqlSequelize from "../Utils/AzureMySqlSequelize.js";
 const OrderProducts = AzureMySqlSequelize.define('OrderProducts',
 {
+    WarehouseId:
+    {
+        type:DataTypes.UUID,
+        allowNull: false
+    },
     ProductId:
     {
         type:DataTypes.UUID,

@@ -41,6 +41,11 @@ import flash from 'connect-flash'
 import CheckSignIn from "./Utils/CheckSignIn.js";
 import Membership from "./Models/Membership.js";
 import OrderAddress from "./Models/OrderAddress.js";
+import geoip from 'geoip-lite'
+import WarehouseOrders from "./Models/WarehouseOrders.js";
+import WarehouseOrderSellers from "./Models/WarehouseOrderSellers.js";
+import gateway from 'express-gateway'
+import Admin from "./Models/Admin.js";
 const PdfDoc = new PDFDocument()
 const stripe = new Stripe('sk_test_51NnFMxSAkBcHrwSFZ1gf73vq5ysppj4fr8Q65NYY9spraIEuHCN8ZyuYvUDA6WQjfKrxuwcoVMzHvUIjQZEayQPg00DzjWL1Kq');
 const expressStore = createSequelizeStore(expressSession.Store);
@@ -66,6 +71,74 @@ app.use(
 app.use(Express.urlencoded({ extended: true }));
 app.use(Express.json({ extended: true }));
 app.use(flash())
+// app.get('/location',async(req,res,next)=>
+// {
+//     const ipAddress = '182.76.158.166';//req.ip;
+//     const geo = geoip.lookup(ipAddress);
+//     if (!geo) {
+//       return res.status(400).json({ error: 'Invalid IP address' });
+//     }
+
+//   // Coordinates (latitude and longitude)
+//   const latitude = geo.ll[0];
+//   const longitude = geo.ll[1];
+
+//   // Construct the OpenCage API URL
+//   const apiUrl = `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=${process.env.GeoLocationAPiKey}&pretty=1`;
+
+//   // // Perform the reverse geocoding using fetch
+//   const geoCodingReverseGeoLocation = await fetch(apiUrl)
+//   const geoCodingResponse = await geoCodingReverseGeoLocation.json()
+//   const locationDetails = (geoCodingResponse.results && geoCodingResponse.results.length > 0)? geoCodingResponse.results[0] : null
+//   const location = {
+//       ip: ipAddress,
+//       city: geo.city,
+//       region: geo.region,
+//       country: geo.country,
+//       // zipCode: locationDetails.components.postcode,
+//       ll: geo.ll,
+//       // formatedAddress: locationDetails.formatted,
+//   }
+//   return res.json({location:location})
+// })
+app.use(async (req,res,next)=>
+{
+  try
+  {
+      const ipAddress = '182.76.158.166';//req.ip;
+      const geo = geoip.lookup(ipAddress);
+      if (!geo) {
+        throw new Error({ error: 'Invalid IP address' });
+      }
+      // // Coordinates (latitude and longitude)
+      // const latitude = geo.ll[0];
+      // const longitude = geo.ll[1];
+
+      // // Construct the OpenCage API URL
+      // const apiUrl = `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=${process.env.GeoLocationAPiKey}&pretty=1`;
+  
+      // // Perform the reverse geocoding using fetch
+      // const geoCodingReverseGeoLocation = await fetch(apiUrl)
+      // const geoCodingResponse = await geoCodingReverseGeoLocation.json()
+      // return res.json({message:geoCodingResponse})
+      // const locationDetails = (geoCodingResponse.results && geoCodingResponse.results.length > 0)? geoCodingResponse.results[0] : null
+      const location = {
+        ip: ipAddress,
+        city: geo.city,
+        region: geo.region,
+        country: geo.country,
+        zipCode: '500039',//locationDetails.components.postcode,
+        ll: geo.ll,
+        formatedAddress: 'Janapriya aparts, church colony, ramanthapur, uppal, hyderabad'//locationDetails.formatted,
+      }
+      req.session.location = location
+  }
+  catch(err)
+  {
+    console.log('Error occured when fetching location due to:',err.message)
+  }
+  next()
+})
 app.use("/auth", AuthRoutes);
 app.get('/download/invoice/:id',CheckSignIn,async(req,res,next)=>
 {
@@ -183,15 +256,22 @@ app.get('/order/success/:id',CheckSignIn, async (req, res) => {
     const user = await User.findByPk(req.session.userId)
     if(!user) throw new Error(`User must be authenticated to continue`)
     if(!orderId) new Error('Invalid request, OrderId is missing')
-    let fetchedOrder = (await user.getOrders({where:{Id:orderId}}))[0]
+    let fetchedOrder = (await user.getOrders({where:{Id:orderId}, include:[{model: Product}]}))[0]
     if(!fetchedOrder) throw new Error(`Order:${orderId} is invalid or does not exists`)
-    fetchedOrder.Status = 'placed'
     //send an event to hub stating order placed with orderId
+    const tobeFulfilled = fetchedOrder.Products.map(async (product)=>
+      {
+        await WarehouseOrders.create({OrderId: fetchedOrder.Id,WarehouseId: product.WarehouseId})
+      })
+    await Promise.all(tobeFulfilled)
+    // const cart = await user.getCart()
     
+    // await cart.destroy()
+    
+    fetchedOrder.Status = 'placed'
     await fetchedOrder.save()
-    const cart = await user.getCart()
-    await cart.destroy()
-    return res.redirect('/')
+  
+    return res.redirect('/shop/orders')
   }
   catch(err)
   {
@@ -204,13 +284,13 @@ app.get('/order/cancel',CheckSignIn, async (req, res) => {
 });
 app.post('/create-checkout-session/:id',CheckSignIn, async (req, res) => {
   const {id:orderId} = req.params
-  const user = await User.findOne({where:{Id: req.session.userId},include:[{model:UserAddress, where:{AddressType:'shipping'}}]})
+  const user = await User.findOne({where:{Id: req.session.userId}})
   if(!user) throw new Error(`User must be authenticated to continue`)
   if(!orderId) throw new Error(`invalid request, orderId is missing`)
   if(!user.hasOrder(orderId)) throw new Error(`${orderId} doesn't exists`)
   let orders = await user.getOrders({where:{Id:orderId},include:[{
     model:Product
-}]})
+},{model:OrderAddress}]})
 if(orders.length>0)    
     orders = orders.map(order=>
     ({
@@ -240,12 +320,12 @@ if(orders.length>0)
     {
     const customer = await stripe.customers.create({email:user.Email,name: user.PreferredName, phone: user.MobileNumber, address: 
       {
-        city:user.UserAddresses.City,
-        country: user.UserAddresses.Country,
-        state: user.UserAddresses.State,
-        postal_code: user.UserAddresses.ZipCode,
-        line1: user.UserAddresses.AddressLine1,
-        line2: user.UserAddresses.AddressLine2
+        city:orders.OrderAddress.City,
+        country: orders.OrderAddress.Country,
+        state: orders.OrderAddress.State,
+        postal_code: orders.OrderAddress.ZipCode,
+        line1: orders.OrderAddress.AddressLine1,
+        line2: orders.OrderAddress.AddressLine2
       }})
     }
     catch(err)
@@ -301,13 +381,23 @@ app.use("/orders", Auth, OrderRoutes);
 app.use("/userAddress", Auth,UserAddressRoutes);
 app.use("/warehouse", Auth, WarehouseRoutes);
 app.use("/shipment", Auth,ShipmentRoutes);
-app.use(ViewRoutes)
+app.use('/shop',ViewRoutes)
 app.use('/test',Auth,async(req,res,next)=>
 {
   try
   {
-    const user = await User.findOne({where:{Id: req.session.userId},include:[{model:UserAddress, where:{AddressType:'shipping'}}]})
-    await stripe.customers.del('cus_OdrT8UCUzA0oof')
+    // const user = await User.findOne({where:{Id: req.session.userId},include:[{model:UserAddress, where:{AddressType:'shipping'}}]})
+    // const order = (await user.getOrders({where: {Id:'0da82f59-88bc-4596-9d93-d7d5f6ff3a74'}}))[0]
+    // const products = await order.getProducts()
+    // const toBeResolved = products.map(async (product)=>
+    // {
+    //   const warehouseDetails = await product.getWarehouses()
+    //   // await order.addWarehouses({})
+    //   // return res.json({warehouseDetails})
+    // })
+    // await Promise.all(toBeResolved)
+    return res.json({result:await WarehouseProducts.findAll()})
+    //await stripe.customers.del('cus_OdrT8UCUzA0oof')
     // const customer = await stripe.customers.create({email:user.Email,name: user.PreferredName, phone: user.MobileNumber, address: 
     //   {
     //     city:user.UserAddresses.City,
@@ -317,9 +407,9 @@ app.use('/test',Auth,async(req,res,next)=>
     //     line1: user.UserAddresses.AddressLine1,
     //     line2: user.UserAddresses.AddressLine2
     //   }})
-    const customers = await stripe.customers.list()
-      console.log(customers)
-      return req.status(200).json(customers)
+    // const customers = await stripe.customers.list()
+    // customers.data.forEach(async(cust)=>await stripe.customers.del(cust.id))      
+    // return res.status(200).json(customers)
       // await publishEventtoServiceBus("userqueue","test",{message:'this is atleast message'})
   }
   catch(err)
@@ -343,6 +433,10 @@ Shipment.belongsTo(User);
 //user seller (one to one)
 User.hasOne(Seller);
 Seller.belongsTo(User);
+
+//user seller (one to one)
+User.hasOne(Admin);
+Admin.belongsTo(User);
 
 //user email verification table
 User.hasOne(UserVerification);
@@ -383,8 +477,18 @@ Shipment.belongsTo(Order);
 Order.hasOne(OrderAddress)
 OrderAddress.belongsTo(Order)
 
-app.listen(process.env.PORT || PORT, () => console.log("running!!!"));
-// AzureMySqlSequelize
-//   .sync({force:true})
-//   .then((_) => app.listen(PORT, () => console.log("running!!!")))
-//   .catch((err) => console.log(err));
+//warehouse <-> orders & Seller <-> WarehouseOrders 
+Warehouse.belongsToMany(Order, {through: WarehouseOrders})
+Order.belongsToMany(Warehouse, {through: WarehouseOrders})
+
+Seller.belongsToMany(WarehouseOrders, {through: WarehouseOrderSellers})
+WarehouseOrders.belongsToMany(Seller, {through: WarehouseOrderSellers})
+
+// app.listen(process.env.PORT || PORT, () => {
+//   console.log("running!!!")
+//   // WarehouseOrders.destroy({where:{}})
+// });
+AzureMySqlSequelize
+  .sync({alter:true})
+  .then((_) => app.listen(PORT, () => console.log("running!!!")))
+  .catch((err) => console.log(err));

@@ -62,6 +62,11 @@ const User = AzureMySqlSequelize.define(
     {
       type:DataTypes.BOOLEAN,
       defaultValue:false      
+    },
+    IsAdmin:
+    {
+      type:DataTypes.BOOLEAN,
+      defaultValue:false      
     }
   },
   { timestamps: true }

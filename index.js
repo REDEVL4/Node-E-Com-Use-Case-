@@ -387,8 +387,10 @@ app.use('/test',Auth,async(req,res,next)=>
 {
   try
   {
-    const wo = await WarehouseOrder.findByPk('f5ea4da4-8926-4735-a0f0-28eb4d2a53c7')
-    const result = await wo.getOrder({include:[{model: Product}]})
+    // const order = await Order.findByPk('fbdd00ab-724e-46b5-8870-67b93528ed76')
+    // const wo = await order.getWarehouseOrder({})
+    const wo = await WarehouseOrder.findByPk('cf71e693-63bd-4a2e-94c1-1905fc43ab31')
+    const result = await wo.getOrder({include:[{model: Product, attributes:["Id","Name","Description","Cost"], through:{attributes:["WarehouseId","Quantity"]}}]})
     // const user = await User.findOne({where:{Id: req.session.userId},include:[{model:UserAddress, where:{AddressType:'shipping'}}]})
     // const order = (await user.getOrders({where: {Id:'0da82f59-88bc-4596-9d93-d7d5f6ff3a74'}}))[0]
     // const products = await order.getProducts()

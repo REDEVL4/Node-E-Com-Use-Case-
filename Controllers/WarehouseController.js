@@ -6,6 +6,7 @@ import User from "../Models/User.js";
 import WarehouseOrders from "../Models/WarehouseOrder.js";
 import Order from "../Models/Order.js";
 import OrderAddress from "../Models/OrderAddress.js";
+import WarehouseOrder from "../Models/WarehouseOrder.js";
 
 export const GetAllWarehouses = async (req, res, next) => {
   try {
@@ -455,29 +456,48 @@ export const GetWarehouseOrders = async (req,res,next)=>
     if(excludeWarehouseStatus) filters = {...filters, Status: {[Op.not]:excludeWarehouseStatus}}
     
     //connect with warehouse orders
-    const warehouseOrderDetails = await Order.findAll({
-      where: { status: "placed", WarehouseStatus: "to be exported" },
-      include: [
+  
+    const warehouseOrderDetails = await WarehouseOrder.findAll({
+      where: {Status:{[Op.ne]:"cancelled"}},
+      attributes:["Id","OrderId","Status"],
+      include:[
         {
-          model: Product,
-          through:{attributes:["Quantity"]},
-          // required: false,
-          include:
-          [
+          model: Order,
+          where: { status: "placed", WarehouseStatus: "to be exported" },
+          attributes:["Id","UserId","Status","TotalCost","WarehouseStatus"],
+          include:[
             {
-              model: Warehouse,
-              where: {...filters},
-              // required:false,
-              // separate: true,
-              // through:{attributes:["Id"]}
+              model: Product,
+              attributes:["Id","Name","Cost","Category","SubCategory"],
+              through:{attributes:["WarehouseId","Quantity"],as:'WarehouseInfo'}
             }
           ]
-        },
-        {
-          model: OrderAddress
         }
-      ],
-    });
+      ]
+    })
+    // await Order.findAll({
+    //   where: { status: "placed", WarehouseStatus: "to be exported" },
+    //   include: [
+    //     {
+    //       model: Product,
+    //       through:{attributes:["Quantity"]},
+    //       // required: false,
+    //       include:
+    //       [
+    //         {
+    //           model: Warehouse,
+    //           where: {...filters},
+    //           // required:false,
+    //           // separate: true,
+    //           // through:{attributes:["Id"]}
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       model: OrderAddress
+    //     }
+    //   ],
+    // });
     // const warehouseOrderDetails = await  WarehouseOrders.findAll({where:{...filters}})
     return res
     .status(200)

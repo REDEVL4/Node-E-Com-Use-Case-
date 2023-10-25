@@ -339,7 +339,7 @@
         } else {
           getAuthToken()
             .then((authToken) => {
-              const url = `http://localhost:8003/useraddress`;
+              const url = `http://localhost:8003/useraddress?excludeAddressType=seller`;
               fetch(url, {
                 method: "get",
                 headers: {
@@ -353,7 +353,7 @@
                     const addresses = result.result;
                     dropdownElement.innerHTML = null;
                     addresses.forEach((address) => {
-                      console.log(address);
+                      // console.log(address);
                       const fullAddress =
                         address.AddressLine1 +
                         ", " +
@@ -422,7 +422,7 @@
                   })
                     .then((response) => response.json())
                     .then((result) => {
-                      console.log(result);
+                      console.log('set address response',result);
 
                       //setting delivery address
                       const fullAddress =
@@ -455,6 +455,10 @@
                       }
                     })
                     .catch((err) => console.log(err));
+                }
+                else
+                {
+                  console.log(addressDetails)
                 }
               })
               .catch((err) => console.log(err));

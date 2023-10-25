@@ -3,7 +3,7 @@ import Product from "../Models/Product.js";
 import Seller from "../Models/Seller.js";
 import Warehouse from "../Models/Warehouse.js";
 import User from "../Models/User.js";
-import WarehouseOrders from "../Models/WarehouseOrders.js";
+import WarehouseOrders from "../Models/WarehouseOrder.js";
 import Order from "../Models/Order.js";
 import OrderAddress from "../Models/OrderAddress.js";
 
@@ -490,7 +490,7 @@ export const GetWarehouseOrders = async (req,res,next)=>
   catch(err)
  {
   return res
-      .status(400)
+      .status(err.statusCode??400)
       .json({
         statusCode: err.statusCode?err.statusCode:"400",
         operation: "GetWarehouseOrders",

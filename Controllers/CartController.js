@@ -3,6 +3,7 @@ import User from "../Models/User.js";
 import Product from "../Models/Product.js";
 import { Op } from "sequelize";
 import Seller from "../Models/Seller.js";
+import Warehouse from "../Models/Warehouse.js";
 export const GetCart = async(req,res,next)=>
 {
     try
@@ -74,9 +75,14 @@ export const AddProductToCart = async(req,res,next)=>
         if(hasProduct)
         {
             const existingProduct = await userCart.getProducts({where:{Id:productId}})
-            console.log(existingProduct)
-            const SellerProduct = await Product.findOne({where:{Id: productId},include:[{model:Seller, through:{attributes:["Quantity"]}}]})
-            if(!(SellerProduct.Sellers[0].SellerProducts.Quantity >= +existingProduct[0].CartProducts.Quantity+quantity))
+            const warehouseProduct = (await Warehouse.findOne({where:{Id: warehouseId}, attributes:["Id"],include:[{
+                model: Product,
+                attributes:["Id","Name","Description","Cost"],
+                where:{Id: productId},
+                through:{attributes:["Quantity"]}
+            }]}))
+
+            if(!(+warehouseProduct.Products[0].WarehouseProducts.Quantity >= +existingProduct[0].CartProducts.Quantity+quantity))
                 throw new Error(`requested Quantity is unavailable at the moment!`)
             await userCart.addProduct(existingProduct[0],{through:{Quantity:+existingProduct[0].CartProducts.Quantity+quantity}})
             userCart.TotalCost = (parseFloat(userCart.TotalCost) + quantity * existingProduct[0].Cost).toFixed(4)
@@ -84,12 +90,17 @@ export const AddProductToCart = async(req,res,next)=>
         }
         else
         {
-            const productToAdd = await Product.findByPk(productId)
-            const SellerProduct = (await productToAdd.getSellers())[0]
-            if(!(SellerProduct.SellerProducts.Quantity >= +quantity))
+            //new changes for warehouse
+            const warehouseProduct = (await Warehouse.findOne({where:{Id: warehouseId}, attributes:["Id"],include:[{
+                model: Product,
+                attributes:["Id","Name","Description","Cost"],
+                where:{Id: productId},
+                through:{attributes:["Quantity"]}
+            }]}))
+            if(!(+warehouseProduct.Products[0].WarehouseProducts.Quantity >= +quantity))
                 throw new Error(`requested Quantity is unavailable at the moment!`)
-            const cartProduct = await userCart.addProduct(productToAdd,{through:{Quantity:quantity,WarehouseId:warehouseId}})
-            userCart.TotalCost = (parseFloat(userCart.TotalCost) + quantity * productToAdd.Cost).toFixed(4)
+            await userCart.addProduct(warehouseProduct.Products[0].Id,{through:{Quantity:quantity,WarehouseId:warehouseId}})
+            userCart.TotalCost = (parseFloat(userCart.TotalCost) + quantity * warehouseProduct.Products[0].Cost).toFixed(4)
             await userCart.save()
         }
         res.locals.message=`${quantity} products are added to User:${user.Id} cart `

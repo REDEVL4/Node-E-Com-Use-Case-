@@ -42,10 +42,11 @@ import CheckSignIn from "./Utils/CheckSignIn.js";
 import Membership from "./Models/Membership.js";
 import OrderAddress from "./Models/OrderAddress.js";
 import geoip from 'geoip-lite'
-import WarehouseOrders from "./Models/WarehouseOrders.js";
+import WarehouseOrder from "./Models/WarehouseOrder.js";
 import WarehouseOrderSellers from "./Models/WarehouseOrderSellers.js";
 import gateway from 'express-gateway'
 import Admin from "./Models/Admin.js";
+import OrdersWarehouses from "./Models/OrdersWarehouses.js";
 const PdfDoc = new PDFDocument()
 const stripe = new Stripe('sk_test_51NnFMxSAkBcHrwSFZ1gf73vq5ysppj4fr8Q65NYY9spraIEuHCN8ZyuYvUDA6WQjfKrxuwcoVMzHvUIjQZEayQPg00DzjWL1Kq');
 const expressStore = createSequelizeStore(expressSession.Store);
@@ -256,21 +257,21 @@ app.get('/order/success/:id',CheckSignIn, async (req, res) => {
     const user = await User.findByPk(req.session.userId)
     if(!user) throw new Error(`User must be authenticated to continue`)
     if(!orderId) new Error('Invalid request, OrderId is missing')
-    let fetchedOrder = (await user.getOrders({where:{Id:orderId}, include:[{model: Product}]}))[0]
+    let fetchedOrder = (await user.getOrders({where:{Id:orderId}}))[0]
     if(!fetchedOrder) throw new Error(`Order:${orderId} is invalid or does not exists`)
     //send an event to hub stating order placed with orderId
-    const tobeFulfilled = fetchedOrder.Products.map(async (product)=>
-      {
-        await WarehouseOrders.create({OrderId: fetchedOrder.Id,WarehouseId: product.WarehouseId})
-      })
-    await Promise.all(tobeFulfilled)
+    // const tobeFulfilled = fetchedOrder.Products.map(async (product)=>
+    //   {
+    //     await WarehouseOrders.create({OrderId: fetchedOrder.Id,WarehouseId: product.WarehouseId})
+    //   })
+    // await Promise.all(tobeFulfilled)
     // const cart = await user.getCart()
     
     // await cart.destroy()
     
     fetchedOrder.Status = 'placed'
     await fetchedOrder.save()
-  
+    await fetchedOrder.createWarehouseOrder({});
     return res.redirect('/shop/orders')
   }
   catch(err)
@@ -386,6 +387,8 @@ app.use('/test',Auth,async(req,res,next)=>
 {
   try
   {
+    const wo = await WarehouseOrder.findByPk('f5ea4da4-8926-4735-a0f0-28eb4d2a53c7')
+    const result = await wo.getOrder({include:[{model: Product}]})
     // const user = await User.findOne({where:{Id: req.session.userId},include:[{model:UserAddress, where:{AddressType:'shipping'}}]})
     // const order = (await user.getOrders({where: {Id:'0da82f59-88bc-4596-9d93-d7d5f6ff3a74'}}))[0]
     // const products = await order.getProducts()
@@ -396,7 +399,18 @@ app.use('/test',Auth,async(req,res,next)=>
     //   // return res.json({warehouseDetails})
     // })
     // await Promise.all(toBeResolved)
-    return res.json({result:await WarehouseProducts.findAll()})
+    // const order = await Order.findByPk('4f0d4ccb-bbd3-4bc5-bfb1-3a751697175a')
+    // await order.createWarehouseOrder()
+    // const worder = await WarehouseOrder.findOne({where:{OrderId: 'e53a2595-da9d-4545-a587-459b39d323b8'}, include:[]})
+    // await order.createWarehouseOrder({});
+    // const w = await order.getProducts({nested:false, saperate: true,attributes:[], include:[
+    //   {
+    //     model: Warehouse,
+    //     attributes:["Id"],
+    //     through:{attributes:[]}
+    //   }
+    // ], through:{attributes:null},})
+    return res.json({result:result})
     //await stripe.customers.del('cus_OdrT8UCUzA0oof')
     // const customer = await stripe.customers.create({email:user.Email,name: user.PreferredName, phone: user.MobileNumber, address: 
     //   {
@@ -478,17 +492,38 @@ Order.hasOne(OrderAddress)
 OrderAddress.belongsTo(Order)
 
 //warehouse <-> orders & Seller <-> WarehouseOrders 
-Warehouse.belongsToMany(Order, {through: WarehouseOrders})
-Order.belongsToMany(Warehouse, {through: WarehouseOrders})
+// Warehouse.belongsToMany(Order, {through: WarehouseOrders})
+// Order.belongsToMany(Warehouse, {through: WarehouseOrders})
 
-Seller.belongsToMany(WarehouseOrders, {through: WarehouseOrderSellers})
-WarehouseOrders.belongsToMany(Seller, {through: WarehouseOrderSellers})
+// Seller.belongsToMany(WarehouseOrder, {through: WarehouseOrderSellers})
+// WarehouseOrder.belongsToMany(Seller, {through: WarehouseOrderSellers})
 
-// app.listen(process.env.PORT || PORT, () => {
-//   console.log("running!!!")
-//   // WarehouseOrders.destroy({where:{}})
-// });
-AzureMySqlSequelize
-  .sync({alter:true})
-  .then((_) => app.listen(PORT, () => console.log("running!!!")))
-  .catch((err) => console.log(err));
+Order.hasOne(WarehouseOrder)
+WarehouseOrder.belongsTo(Order)
+
+// WarehouseOrder.belongsToMany(Product, { through: OrderProducts });
+// Product.belongsToMany(WarehouseOrder, { through: OrderProducts });
+
+
+// WarehouseOrder.belongsToMany(Warehouse, {through: OrdersWarehouses})
+// Warehouse.belongsToMany(WarehouseOrder, {through: OrdersWarehouses})
+
+app.listen(process.env.PORT || PORT,async () => {
+  console.log("running!!!")
+  // const order = await Order.findByPk('ea6b1cd5-e317-41a3-bd60-a54ceb079525')
+  // const w = await order.getProducts({attributes:[], include:[
+  //   {
+  //     model: Warehouse,
+  //     attributes:["Id"]
+  //   }
+  // ]})
+  // // await order.createWarehouseOrder()
+  // // const wo = await order.getWarehouseOrder()
+  // // const w = await wo.getWarehouses()
+  // console.log(w)
+  // WarehouseProducts.destroy({where:{}})
+});
+// AzureMySqlSequelize
+//   .sync({force:true})
+//   .then((_) => app.listen(PORT, () => console.log("running!!!")))
+//   .catch((err) => console.log(err));

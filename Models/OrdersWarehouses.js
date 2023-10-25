@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize"
 import AzureMySqlSequelize from "../Utils/AzureMySqlSequelize.js"
-const WarehouseOrders = AzureMySqlSequelize.define('WarehouseOrders',
+const OrdersWarehouses = AzureMySqlSequelize.define('OrdersWarehouses',
 {
     Id:
     {
@@ -8,13 +8,6 @@ const WarehouseOrders = AzureMySqlSequelize.define('WarehouseOrders',
         primaryKey:true,
         allowNull:false,
         defaultValue:DataTypes.UUIDV4
-    },
-    Status:
-    {
-        type:DataTypes.STRING,
-        values:["initiated","to be checked for availability","availability confirmed","package request sent to seller","waiting to to be picked up from seller","shipping initiated","shipping in progress","shipped successfully","successful","cancelled"],
-        defaultValue:"initiated",
-        allowNull:false
     },
     OrderId:
     {
@@ -35,4 +28,4 @@ const WarehouseOrders = AzureMySqlSequelize.define('WarehouseOrders',
         }
     }
 })
-export default WarehouseOrders
+export default OrdersWarehouses

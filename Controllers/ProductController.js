@@ -497,8 +497,9 @@ export const RenderAllShopProducts = async(req,res,next)=>
               },
             ],
           });
-          
-          const productsdataWithSellerInfo = warehouseProducts.Products.map(product=>(            {
+        //   return res.json({warehouseProducts})
+
+        const productsdataWithSellerInfo = warehouseProducts?warehouseProducts.Products.map(product=>(            {
             Id: product.Id,
             Name: product.Name,
             Description: product.Description,
@@ -527,7 +528,7 @@ export const RenderAllShopProducts = async(req,res,next)=>
             WarehouseInfo:{
                 WarehouseId: warehouseProducts.Id
             }
-            })) 
+            })):[];
         // return res.json({warehouseProducts})
         //latest
         // let productsResult = await Product.findAll({

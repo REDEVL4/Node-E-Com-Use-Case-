@@ -6,7 +6,8 @@ const WarehouseProducts = AzureMySqlSequelize.define('WarehouseProducts',
     // {
     //     type:DataTypes.UUID,
     //     allowNull:false,
-    //     primaryKey: true
+    //     primaryKey: true,
+    //     defaultValue: DataTypes.UUID
     // }, 
     ProductId:
     {

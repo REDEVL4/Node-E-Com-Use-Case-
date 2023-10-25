@@ -4,6 +4,7 @@ import User from "../Models/User.js"
 import Seller from '../Models/Seller.js'
 import UserAddress from '../Models/UserAddress.js'
 import OrderAddress from '../Models/OrderAddress.js'
+import Warehouse from '../Models/Warehouse.js'
 
 export const GetOrdersById = async(req,res,next)=>
 {
@@ -101,15 +102,30 @@ export const CreateOrder = async(req,res,next)=>
         if(!user) throw new Error(`User must be authenticated to continue`)
         // const pendingOrders = await user.getOrders({where:{Status:'pending'}})
         // if(pendingOrders.length>0) throw {statusCode:422, message:`Cannot place order with pending orders in queue`}
-        let userCart = await user.getCart({include:[{model: Product, attributes:["Id","Name","Cost","Category","SubCategory","ManufacturedBy"],through:{attributes:["CartId","Quantity","WarehouseId"]},
-        include:
-        [
+        let userCart = await user.getCart({
+          include: [
             {
-                model:Seller,
-                attributes:["Id","Name"],
-                through:{attributes:["Quantity"]}
-            }
-        ]}]})
+              model: Product,
+              attributes: [
+                "Id",
+                // "Name",
+                "Cost",
+                // "Category",
+                // "SubCategory",
+                // "ManufacturedBy",
+              ],
+              through: { attributes: ["CartId", "Quantity", "WarehouseId"] },
+              include: [
+                {
+                  model: Warehouse,
+                  attributes: ["Id"],
+                  through: { attributes: ["Quantity"] },
+                },
+              ],
+            },
+          ],
+        });
+
         if(userCart)
         {
             // let userBasketProducts = await userCart.getProducts({
@@ -125,29 +141,28 @@ export const CreateOrder = async(req,res,next)=>
             // })
             const userBasketProducts = userCart.Products.map(product=>(
                 {
-                    WarehouseId: product.CartProducts.WarehouseId,
                     ProductId:product.Id,
                     ProductName:product.Name,
                     ProductCost:product.Cost,
                     Category:product.Category,
                     SubCategory:product.SubCategory,
                     ManufacturedBy:product.ManufacturedBy,
-                    Seller:{
-                        SellerId:product.Sellers[0].Id,
-                        SellerName:product.Sellers[0].Name,
-                        AvailableQuantity:product.Sellers[0].SellerProducts.Quantity,
-                    },
                     Cart:
                     {
                         CartId:product.CartProducts.CartId,
-                         PlacedQuantity:product.CartProducts.Quantity
+                        PlacedQuantity:product.CartProducts.Quantity
+                    },
+                    Warehouse:
+                    {
+                        WarehouseId: product.Warehouses[0].Id,
+                        AvailableQuantity: product.Warehouses[0].WarehouseProducts.Quantity
                     }
                     }))
             //check availability
             let productsAvailable = true
             userBasketProducts.forEach(async(product)=>
             {
-                 if(+product.Seller.AvailableQuantity<+product.Cart.PlacedQuantity) productsAvailable = false
+                 if(+product.Warehouse.AvailableQuantity<+product.Cart.PlacedQuantity) productsAvailable = false
             })
             if(!productsAvailable)
                 return res.status(200).json({statusCode:'400',message:`Order creation failed due to products unavailability`})
@@ -164,7 +179,7 @@ export const CreateOrder = async(req,res,next)=>
                     // productToUpdate.SellerProducts.Quantity -= product.Cart.PlacedQuantity 
                     // console.log(productToUpdate.SellerProducts.Quantity)
                     // await productToUpdate.SellerProducts.save()
-                    await userOrder.addProducts(product.ProductId,{through:{Quantity:+product.Cart.PlacedQuantity, WarehouseId: product.WarehouseId}})
+                    await userOrder.addProducts(product.ProductId,{through:{Quantity:+product.Cart.PlacedQuantity, WarehouseId: product.Warehouse.WarehouseId}})
                 })
             return res.status(200).json({statusCode:'200',message:`Order: ${userOrder.Id} placed with ${userBasketProducts.length} Basket Products`,result:{orderId:userOrder.Id}})     
         }
@@ -345,45 +360,56 @@ export const RenderCreateOrder = async(req,res,next)=>
         if(!user) throw new Error(`User must be authenticated to continue`)
         // const pendingOrders = await user.getOrders({where:{Status:'pending'}})
         // if(pendingOrders.length>0) throw {statusCode:422, message:`Cannot place order with pending orders in queue`}
-        let userCart = await user.getCart({include:[{model: Product, attributes:["Id","Name","Cost","Category","SubCategory","ManufacturedBy"],through:{attributes:["CartId","Quantity","WarehouseId"]},
-        include:
-        [
-            {
-                model:Seller,
-                attributes:["Id","Name"],
-                through:{attributes:["Quantity"]}
-            }
-        ]}]})
+        let userCart = await user.getCart({
+            include: [
+              {
+                model: Product,
+                attributes: [
+                  "Id",
+                  "Cost",
+                ],
+                through: { attributes: ["CartId", "Quantity", "WarehouseId"] },
+                include: [
+                  {
+                    model: Warehouse,
+                    attributes: ["Id"],
+                    through: { attributes: ["Quantity"] },
+                  },
+                ],
+              },
+            ],
+          });
+  
+  
         if(userCart)
         {
             const userBasketProducts = userCart.Products.map(product=>(
                 {
-                    WarehouseId: product.CartProducts.WarehouseId,
                     ProductId:product.Id,
                     ProductName:product.Name,
                     ProductCost:product.Cost,
                     Category:product.Category,
                     SubCategory:product.SubCategory,
                     ManufacturedBy:product.ManufacturedBy,
-                    Seller:{
-                        SellerId:product.Sellers[0].Id,
-                        SellerName:product.Sellers[0].Name,
-                        AvailableQuantity:product.Sellers[0].SellerProducts.Quantity,
-                    },
                     Cart:
                     {
                         CartId:product.CartProducts.CartId,
-                         PlacedQuantity:product.CartProducts.Quantity
-                        }}))
-
+                        PlacedQuantity:product.CartProducts.Quantity
+                    },
+                    Warehouse:
+                    {
+                        WarehouseId: product.Warehouses[0].Id,
+                        AvailableQuantity: product.Warehouses[0].WarehouseProducts.Quantity
+                    }
+                    }))
             //check availability
             let productsAvailable = true
             userBasketProducts.forEach(async(product)=>
             {
-                 if(+product.Seller.AvailableQuantity<+product.Cart.PlacedQuantity) productsAvailable = false
+                 if(+product.Warehouse.AvailableQuantity<+product.Cart.PlacedQuantity) productsAvailable = false
             })
             if(!productsAvailable)
-                throw {statusCode:'400',message:`Order creation failed due to products unavailability`}
+                return res.status(200).json({statusCode:'400',message:`Order creation failed due to products unavailability`})
         
                 //discount
                 //
@@ -397,7 +423,7 @@ export const RenderCreateOrder = async(req,res,next)=>
                     // productToUpdate.SellerProducts.Quantity -= product.Cart.PlacedQuantity 
                     // console.log(productToUpdate.SellerProducts.Quantity)
                     // await productToUpdate.SellerProducts.save()
-                    await userOrder.addProducts(product.ProductId,{through:{Quantity:+product.Cart.PlacedQuantity, WarehouseId: product.WarehouseId}})
+                    await userOrder.addProduct(product.ProductId,{through:{Quantity:+product.Cart.PlacedQuantity, WarehouseId: product.Warehouse.WarehouseId}})
                 })
             await Promise.all(finsihPromise)
             await userCart.destroy()

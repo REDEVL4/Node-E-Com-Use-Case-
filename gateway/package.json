@@ -5,6 +5,7 @@
   "license": "UNLICENSED",
   "version": "1.0.0",
   "main": "server.js",
+  "type": "module",
   "dependencies": {
     "express-gateway": "^1.16.11"
   }

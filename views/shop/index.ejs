@@ -192,6 +192,7 @@
                 fetch(url,{
                 method:'post',
                 headers:{
+                    "Access-Control-Allow-Origin":"http://localhost:8003",
                     "Authorization":`Bearer ${authToken}`
                 }
             }).then(result=>

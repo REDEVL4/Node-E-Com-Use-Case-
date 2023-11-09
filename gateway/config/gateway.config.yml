@@ -1,47 +1,94 @@
 http:
-  port: 8080
+  port: 8003
 admin:
   port: 9876
   host: localhost
 
 apiEndpoints:
+  AccessibleUserAPI:
+    host: 'localhost'
+    methods: ['POST']
+    paths: ['/users']
   users:
     host: 'localhost'
-    paths: '/users/**'
+    methods: ['GET','PATCH','DELETE','PUT']
+    paths: ['/users','/users/**']
+  AccessibleProductsAPI:
+    host: 'localhost'
+    methods: ['GET']
+    paths: ['/products']
   products:
     host: 'localhost'
-    paths: '/products/**'
+    methods: ['GET','POST','PATCH','DELETE','PUT']
+    paths: ['/products','/products/**']
   cart:
     host: 'localhost'
-    paths: '/cart/**'
+    paths: ['/cart','/cart/**']
   orders:
     host: 'localhost'
-    paths: '/orders/**'
+    paths: ['/orders','/orders/**']
   userAddress:
     host: 'localhost'
-    paths: '/userAddress/**'
+    paths: ['/userAddress','/userAddress/**']
   warehouse:
     host: 'localhost'
-    paths: '/warehouse/**'
+    paths: ['/warehouse','/warehouse/**']
   shipment:
     host: 'localhost'
-    paths: '/shipment/**'
+    paths: ['/shipment','/shipment/**']
+  auth:
+    host: 'localhost'
+    paths: ['/auth','/auth/**']
   views:
     host: 'localhost'
-    paths: ['/shop/**']
+    paths: ['/shop','/shop/**']
 
 
 serviceEndpoints:
   adminBackend:
     url: 'http://localhost:9876'
   eComService:
-    url: 'http://localhost:8003' # Update with the URL of your e-commerce project
+    url: 'http://localhost:8080' # Update with the URL of your e-commerce project
 
 policies:
   - rate-limit
   - proxy
   - log
   - cors
+  - jwt
+  - response-transformer
+  # - cache
+plugins:
+  responseTransformer:
+    cache:
+      type: memory
+
+
+routes:
+  - path: ['/products']
+    service: my-e-commerce-app
+    conditions:
+      - responseTransformer:
+          cache: true
+          maxAge: 30
+  # - path: /users
+  #   service: my-e-commerce-app
+  # - path: /cart
+  #   service: my-e-commerce-app
+  # - path: /orders
+  #   service: my-e-commerce-app
+  # - path: /userAddress
+  #   service: my-e-commerce-app
+  # - path: /warehouse
+  #   service: my-e-commerce-app
+  # - path: /shipment
+  #   service: my-e-commerce-app
+  # - path: /auth
+  #   service: my-e-commerce-app
+  # - path: /shop
+  #   service: my-e-commerce-app
+
+
 pipelines:
   default:
     apiEndpoints:
@@ -52,28 +99,103 @@ pipelines:
       - userAddress
       - warehouse
       - shipment
-      - views
     policies:
-      - log:
-          - action:
-               message: '${req.method} call made at route:${req.originalUrl} from ip:${req.ip}'
       - cors:
           -
             action:
               orgin: '*'
               methods: 'HEAD,OPTIONS,PUT,PATCH,POST,DELETE,GET'
               optionsSuccessStatus: 204
+      - jwt:
+          - action:
+              secretOrPublicKey: 'c6d3d54d2aa2ca9b88f8069fca3bcb7d'
+              jwtExtractor: 'authBearer'
+              checkCredentialExistence: false
+              passThrough: true
+      - log:
+          - action:
+               message: '${req.method} call made at route:${req.originalUrl} from ip:${req.ip}'
 
       - rate-limit:
           - 
             action:
-              max: 1
+              max: 100
               windowMs: 60000
               message: 'Too many requests, please try again later.'
               statusCode: 429
               rateLimitBy: "${req.ip}"
-      
+      # - response-transformer:
+      #   - action:
+      #       body:
+      #         add: 
+      #           message: "'failed due my intention for macro seconds'"
       - proxy:
         - action:
             serviceEndpoint: eComService
             changeOrgin: true
+  auth:
+    apiEndpoints:
+      - auth
+    policies:
+      - cors:
+          -
+           action:
+              origin: '*'
+              methods: 'HEAD,OPTIONS,PUT,PATCH,POST,DELETE,GET'
+              optionsSuccessStatus: 204
+      - proxy:
+        - action:
+            serviceEndpoint: eComService
+            changeOrigin: true
+      - log:
+        - action:
+            message: '${req.method} call made at route:${req.originalUrl} from ip:${req.ip}'
+      - rate-limit:
+        - action:
+            max: 10
+            windowMs: 60000
+            message: 'Too many requests, please try again later.'
+            statusCode: 429
+            rateLimitBy: "${req.ip}"
+
+  AccessibleAPIs:
+      apiEndpoints:
+        - AccessibleUserAPI
+        - AccessibleProductsAPI
+      policies:
+        - cors:
+          -
+           action:
+              origin: '*'
+              methods: 'HEAD,OPTIONS,PUT,PATCH,POST,DELETE,GET'
+              optionsSuccessStatus: 204
+        - proxy: 
+          - action:
+              serviceEndpoint: eComService
+              changeOrigin: true
+        - log:
+          - action:
+               message: '${req.method} call made at route:${req.originalUrl} from ip:${req.ip}'
+        - rate-limit:
+          - action:
+              max: 10
+              windowMs: 60000
+              message: 'Too many requests, please try again later.'
+              statusCode: 429
+              rateLimitBy: "${req.ip}"
+
+
+  # views:
+  #   apiEndpoints:
+  #     - views
+  #   policies:
+  #     - proxy:
+  #       - action:
+  #           serviceEndpoint: eComService
+  #           changeOrigin: true
+  #     - log:
+  #       - action:
+  #           message: '${req.method} call made at route:${req.originalUrl} from ip:${req.ip}'
+
+
+ 

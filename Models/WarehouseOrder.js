@@ -12,7 +12,7 @@ const WarehouseOrder = AzureMySqlSequelize.define('WarehouseOrder',
     Status:
     {
         type:DataTypes.STRING,
-        values:["initiated","to be checked for availability","availability confirmed","package request sent to seller","waiting to to be picked up from seller","shipping initiated","shipping in progress","shipped successfully","successful","cancelled"],
+        values:["initiated","to be checked for availability","availability confirmed","package request sent to seller","waiting to to be picked up from seller","shipping initiated","shipping in progress","shipped successfully","successful","cancellation initiated","cancelled"],
         defaultValue:"initiated",
         allowNull:false
     },

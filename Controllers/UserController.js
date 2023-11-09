@@ -353,5 +353,5 @@ export const SignOutPost = async(req,res,next)=>
     await req.session.destroy()
     res.locals.message='signOut successful'
     res.locals.isSuccess=true
-    return res.redirect('/')
+    return res.redirect('/shop')
 }

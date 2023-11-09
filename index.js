@@ -1,4 +1,4 @@
-const PORT = 8003;
+const PORT = 8080;
 import Express from "express";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
@@ -47,6 +47,8 @@ import WarehouseOrderSellers from "./Models/WarehouseOrderSellers.js";
 import gateway from 'express-gateway'
 import Admin from "./Models/Admin.js";
 import OrdersWarehouses from "./Models/OrdersWarehouses.js";
+import gateWayServer from "./gateway/gateWayServer.js";
+import {fileURLToPath} from 'url'
 const PdfDoc = new PDFDocument()
 const stripe = new Stripe('sk_test_51NnFMxSAkBcHrwSFZ1gf73vq5ysppj4fr8Q65NYY9spraIEuHCN8ZyuYvUDA6WQjfKrxuwcoVMzHvUIjQZEayQPg00DzjWL1Kq');
 const expressStore = createSequelizeStore(expressSession.Store);
@@ -55,7 +57,7 @@ const store = new expressStore({
   db: AzureMySqlSequelize,
   tableName: "Sessions",
 });
-const appRoot = path.dirname(new URL(import.meta.url).pathname);
+const appRoot = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config("./env");
 app.set("view engine", "ejs");
 app.set("views", "views");
@@ -389,8 +391,8 @@ app.use('/test',Auth,async(req,res,next)=>
   {
     // const order = await Order.findByPk('fbdd00ab-724e-46b5-8870-67b93528ed76')
     // const wo = await order.getWarehouseOrder({})
-    const wo = await WarehouseOrder.findByPk('cf71e693-63bd-4a2e-94c1-1905fc43ab31')
-    const result = await wo.getOrder({include:[{model: Product, attributes:["Id","Name","Description","Cost"], through:{attributes:["WarehouseId","Quantity"]}}]})
+    // const wo = await WarehouseOrder.findByPk('cf71e693-63bd-4a2e-94c1-1905fc43ab31')
+    // const result = await wo.getOrder({include:[{model: Product, attributes:["Id","Name","Description","Cost"], through:{attributes:["WarehouseId","Quantity"]}}]})
     // const user = await User.findOne({where:{Id: req.session.userId},include:[{model:UserAddress, where:{AddressType:'shipping'}}]})
     // const order = (await user.getOrders({where: {Id:'0da82f59-88bc-4596-9d93-d7d5f6ff3a74'}}))[0]
     // const products = await order.getProducts()
@@ -412,6 +414,7 @@ app.use('/test',Auth,async(req,res,next)=>
     //     through:{attributes:[]}
     //   }
     // ], through:{attributes:null},})
+    const result = req.headers
     return res.json({result:result})
     //await stripe.customers.del('cus_OdrT8UCUzA0oof')
     // const customer = await stripe.customers.create({email:user.Email,name: user.PreferredName, phone: user.MobileNumber, address: 
@@ -511,7 +514,8 @@ WarehouseOrder.belongsTo(Order)
 // Warehouse.belongsToMany(WarehouseOrder, {through: OrdersWarehouses})
 
 app.listen(process.env.PORT || PORT,async () => {
-  console.log("running!!!")
+  console.log(`ecom website running on port:${PORT}!!!`)
+  gateWayServer(appRoot)
   // const order = await Order.findByPk('ea6b1cd5-e317-41a3-bd60-a54ceb079525')
   // const w = await order.getProducts({attributes:[], include:[
   //   {

@@ -46,7 +46,7 @@ export const generateToken = async(req,res,next)=>
         if(!isPasswordMatch) throw {statusCode:400, message:'Incorrect password'}
         let expiresIn = 600000
         if(foundUser.isAdmin)  expiresIn = expiresIn * 10
-        const token = jwt.sign({...foundUser},process.env.SecurityKey,{expiresIn:'10h'}) 
+        const token = jwt.sign({...foundUser},process.env.SecurityKey,{expiresIn:`${(expiresIn/1000*60)}h`}) 
         return res.status(200).json({statusCode:200, message:'Token generated successfully',result:{Token:token,ExpiresIn:expiresIn,GeneratedOn:new Date(Date.now)}})  
     }
     catch(err)
